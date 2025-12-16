@@ -87,6 +87,7 @@ dist
 # Gatsby files
 .cache/
 
+#추가
 *.log
 .DS_Store
 

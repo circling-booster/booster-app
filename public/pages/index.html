@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booster App - 홈</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <style>
+    .home-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .home-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      padding: 60px 40px;
+      max-width: 600px;
+      text-align: center;
+      animation: slideUp 0.5s ease;
+    }
+
+    .home-card h1 {
+      color: #667eea;
+      font-size: 36px;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+
+    .home-card p {
+      color: #666;
+      font-size: 16px;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .home-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .home-button {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .home-button-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .home-button-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .home-button-secondary {
+      background-color: #e9ecef;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+
+    .home-button-secondary:hover {
+      background-color: #dee2e6;
+    }
+
+    .home-features {
+      margin-top: 50px;
+      padding-top: 30px;
+      border-top: 1px solid #eee;
+      text-align: left;
+    }
+
+    .home-features h3 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .feature-list li {
+      color: #666;
+      padding-left: 30px;
+      position: relative;
+    }
+
+    .feature-list li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    @media (max-width: 480px) {
+      .home-card {
+        padding: 30px 20px;
+      }
+
+      .home-card h1 {
+        font-size: 28px;
+      }
+
+      .home-buttons {
+        gap: 10px;
+      }
+
+      .home-button {
+        flex: 1;
+        min-width: 130px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="home-container">
+    <div class="home-card">
+      <h1>🚀 Booster App</h1>
+      <p>당신의 성공을 위한 완벽한 웹 애플리케이션에 오신 것을 환영합니다.</p>
+
+      <div class="home-buttons">
+        <a href="/login" class="home-button home-button-primary">로그인</a>
+        <a href="/register" class="home-button home-button-secondary">회원가입</a>
+      </div>
+
+      <div class="home-features">
+        <h3>주요 기능</h3>
+        <ul class="feature-list">
+          <li>안전한 회원가입 및 로그인</li>
+          <li>개인정보 프로필 관리</li>
+          <li>비밀번호 변경</li>
+          <li>JWT 기반 인증</li>
+          <li>클라우드 데이터베이스 연동</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    // 이미 로그인된 경우 프로필 페이지로 리다이렉트
+    document.addEventListener('DOMContentLoaded', () => {
+      if (isAuthenticated()) {
+        window.location.href = '/profile';
+      }
+    });
+  </script>
+</body>
+</html>
