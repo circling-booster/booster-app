@@ -3,7 +3,7 @@
     const API_CONFIG = {
         BASE_URL: window.location.hostname === 'localhost'
             ? 'http://localhost:3000/api'
-            : 'https://booster-app.azurewebsites.net/api',
+            : `${window.location.origin}/api`,
         TIMEOUT: 30000,
 
         // API 엔드포인트
