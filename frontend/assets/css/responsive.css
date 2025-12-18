@@ -1,0 +1,141 @@
+/* ============================================
+   Mobile (< 576px)
+   ============================================ */
+
+@media (max-width: 575.98px) {
+    .sidebar {
+        display: none;
+    }
+
+    .container-fluid .row > main {
+        margin-left: 0 !important;
+    }
+
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .chart-container {
+        height: 300px;
+    }
+
+    .stat-card {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-card .value {
+        font-size: 1.75rem;
+    }
+
+    .table {
+        font-size: 0.85rem;
+    }
+
+    .table-action-buttons .btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+
+    #toast-container {
+        width: 90%;
+        left: 5%;
+        right: auto;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .modal .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+}
+
+/* ============================================
+   Tablet (576px - 768px)
+   ============================================ */
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .sidebar {
+        max-width: 200px;
+    }
+
+    .chart-container {
+        height: 350px;
+    }
+
+    .stat-card {
+        padding: 1.75rem;
+    }
+
+    .table {
+        font-size: 0.9rem;
+    }
+}
+
+/* ============================================
+   Small Desktop (768px - 992px)
+   ============================================ */
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .sidebar {
+        position: relative;
+    }
+
+    .chart-container {
+        height: 380px;
+    }
+}
+
+/* ============================================
+   Large Desktop (992px+)
+   ============================================ */
+
+@media (min-width: 992px) {
+    .chart-container {
+        height: 400px;
+    }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+    .navbar,
+    .sidebar,
+    .btn-action,
+    .form-group {
+        display: none;
+    }
+
+    body {
+        background: white;
+    }
+
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+
+    .table {
+        box-shadow: none;
+    }
+}
+
+/* ============================================
+   High DPI (Retina Displays)
+   ============================================ */
+
+@media (-webkit-min-device-pixel-ratio: 2),
+       (min-resolution: 192dpi) {
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}

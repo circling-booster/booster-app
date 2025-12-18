@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 키 - Booster App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../../index.html">
+                <i class="bi bi-rocket-takeoff"></i> Booster App
+            </a>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 d-md-block bg-light sidebar">
+                <ul class="nav flex-column pt-3">
+                    <li class="nav-item"><a class="nav-link" href="profile.html"><i class="bi bi-person"></i> 프로필</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="api-keys.html"><i class="bi bi-key"></i> API 키</a></li>
+                    <li class="nav-item"><a class="nav-link" href="usage-dashboard.html"><i class="bi bi-graph-up"></i> 사용량</a></li>
+                    <li class="nav-item"><a class="nav-link" href="subscription.html"><i class="bi bi-credit-card"></i> 구독</a></li>
+                    <li class="nav-item"><a class="nav-link" href="webhooks.html"><i class="bi bi-webhook"></i> Webhook</a></li>
+                </ul>
+            </nav>
+
+            <main class="col-md-10 ms-sm-auto px-md-4 py-4">
+                <h2 class="mb-4">API 키 관리</h2>
+
+                <!-- 새 API 키 생성 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">새 API 키 생성</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="create-key-form">
+                            <div class="mb-3">
+                                <label for="keyName" class="form-label">키 이름</label>
+                                <input type="text" class="form-control" id="keyName" placeholder="예: Production API" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">생성</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- API 키 목록 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">등록된 API 키</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>이름</th>
+                                        <th>API Key</th>
+                                        <th>생성일</th>
+                                        <th>마지막 사용</th>
+                                        <th>상태</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="keys-table-body">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">로딩 중...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 새 키 모달 -->
+                <div class="modal fade" id="newKeyModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">새 API 키가 생성되었습니다</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-warning"><i class="bi bi-exclamation-triangle"></i> 
+                                    API Secret은 지금만 표시됩니다. 안전한 장소에 저장하세요!</p>
+                                <div class="mb-3">
+                                    <label>API Key</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="display-api-key" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('display-api-key')">
+                                            <i class="bi bi-clipboard"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label>API Secret</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="display-api-secret" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('display-api-secret')">
+                                            <i class="bi bi-clipboard"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../config.js"></script>
+    <script src="../../assets/js/auth-manager.js"></script>
+    <script src="../../assets/js/api-client.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+
+    <script>
+        UIUtils.enforcePermission('user');
+
+        const newKeyModal = new bootstrap.Modal(document.getElementById('newKeyModal'));
+
+        // API 키 목록 로드
+        async function loadApiKeys() {
+            try {
+                const response = await apiClient.get(API_CONFIG.ENDPOINTS.API_KEYS.LIST);
+                if (response.success) {
+                    const tbody = document.getElementById('keys-table-body');
+                    tbody.innerHTML = response.data.map(key => `
+                        <tr>
+                            <td>${key.key_name}</td>
+                            <td>
+                                <code>${key.api_key.substring(0, 10)}...</code>
+                                <button class="btn btn-sm btn-outline-primary ms-2" onclick="copyToClipboard('${key.api_key}')">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </td>
+                            <td>${new Date(key.created_at).toLocaleDateString('ko-KR')}</td>
+                            <td>${key.last_used ? new Date(key.last_used).toLocaleDateString('ko-KR') : '미사용'}</td>
+                            <td>
+                                <span class="badge ${key.is_active ? 'bg-success' : 'bg-danger'}">
+                                    ${key.is_active ? '활성' : '비활성'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteApiKey('${key.id}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                UIUtils.showToast('API 키 로드 실패: ' + err.message, 'error');
+            }
+        }
+
+        // API 키 생성
+        document.getElementById('create-key-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const response = await apiClient.post(API_CONFIG.ENDPOINTS.API_KEYS.CREATE, {
+                    keyName: document.getElementById('keyName').value
+                });
+
+                if (response.success) {
+                    const data = response.data;
+                    document.getElementById('display-api-key').value = data.apiKey;
+                    document.getElementById('display-api-secret').value = data.apiSecret;
+                    newKeyModal.show();
+                    document.getElementById('create-key-form').reset();
+                    loadApiKeys();
+                }
+            } catch (err) {
+                UIUtils.showToast('API 키 생성 실패: ' + err.message, 'error');
+            }
+        });
+
+        // API 키 삭제
+        async function deleteApiKey(keyId) {
+            if (confirm('이 API 키를 삭제하시겠습니까?')) {
+                try {
+                    const response = await apiClient.delete(API_CONFIG.ENDPOINTS.API_KEYS.DELETE(keyId));
+                    if (response.success) {
+                        UIUtils.showToast('API 키가 삭제되었습니다', 'success');
+                        loadApiKeys();
+                    }
+                } catch (err) {
+                    UIUtils.showToast('API 키 삭제 실패: ' + err.message, 'error');
+                }
+            }
+        }
+
+        // 클립보드 복사
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.value;
+            navigator.clipboard.writeText(text).then(() => {
+                UIUtils.showToast('클립보드에 복사되었습니다', 'success');
+            });
+        }
+
+        loadApiKeys();
+    </script>
+</body>
+</html>

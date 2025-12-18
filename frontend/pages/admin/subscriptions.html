@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구독 관리 - Booster App 관리자</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../../index.html">
+                <i class="bi bi-rocket-takeoff"></i> Booster App Admin
+            </a>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 d-md-block bg-light sidebar">
+                <ul class="nav flex-column pt-3">
+                    <li class="nav-item"><a class="nav-link" href="users-management.html"><i class="bi bi-people"></i> 사용자 관리</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="subscriptions.html"><i class="bi bi-graph-up"></i> 구독 관리</a></li>
+                    <li class="nav-item"><a class="nav-link" href="api-monitoring.html"><i class="bi bi-speedometer2"></i> API 모니터링</a></li>
+                    <li class="nav-item"><a class="nav-link" href="audit-logs.html"><i class="bi bi-file-text"></i> 감사 로그</a></li>
+                </ul>
+            </nav>
+
+            <main class="col-md-10 ms-sm-auto px-md-4 py-4">
+                <h2 class="mb-4">구독 관리</h2>
+
+                <!-- 통계 -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-card">
+                            <h3>Basic</h3>
+                            <div class="value" id="basic-count">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-card">
+                            <h3>Premium</h3>
+                            <div class="value" id="premium-count">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-card">
+                            <h3>Enterprise</h3>
+                            <div class="value" id="enterprise-count">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-card">
+                            <h3>대기 중</h3>
+                            <div class="value" id="pending-count">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 대기 중인 구독 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">승인 대기 구독 신청</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>사용자</th>
+                                        <th>요청 Tier</th>
+                                        <th>신청일</th>
+                                        <th>상태</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pending-table-body">
+                                    <tr><td colspan="5" class="text-center text-muted">로딩 중...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="../../config.js"></script>
+    <script src="../../assets/js/auth-manager.js"></script>
+    <script src="../../assets/js/api-client.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+
+    <script>
+        if (!UIUtils.checkPermission('admin')) {
+            window.location.href = '../../pages/auth/login.html';
+        }
+
+        // 구독 통계 로드
+        async function loadStats() {
+            try {
+                const response = await apiClient.get(API_CONFIG.ENDPOINTS.ADMIN.STATS);
+                if (response.success) {
+                    const data = response.data;
+                    document.getElementById('basic-count').textContent = data.basicCount || 0;
+                    document.getElementById('premium-count').textContent = data.premiumCount || 0;
+                    document.getElementById('enterprise-count').textContent = data.enterpriseCount || 0;
+                    document.getElementById('pending-count').textContent = data.pendingCount || 0;
+                }
+            } catch (err) {
+                UIUtils.showToast('통계 로드 실패: ' + err.message, 'error');
+            }
+        }
+
+        // 대기 중인 구독 로드
+        async function loadPendingSubscriptions() {
+            try {
+                const response = await apiClient.get(API_CONFIG.ENDPOINTS.ADMIN.SUBSCRIPTIONS);
+                if (response.success) {
+                    const tbody = document.getElementById('pending-table-body');
+                    tbody.innerHTML = response.data.map(sub => `
+                        <tr>
+                            <td>${sub.email}</td>
+                            
+                            <td><span class="badge bg-info">${sub.tier_name}</span></td>
+                            <td>${new Date(sub.created_at).toLocaleDateString('ko-KR')}</td>
+                            <td><span class="badge bg-warning">대기</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="approveSubscription('${sub.id}')">
+                                    <i class="bi bi-check"></i> 승인
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="rejectSubscription('${sub.id}')">
+                                    <i class="bi bi-x"></i> 거절
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="5" class="text-center text-muted">대기 중인 신청이 없습니다</td></tr>';
+                }
+            } catch (err) {
+                UIUtils.showToast('구독 로드 실패: ' + err.message, 'error');
+            }
+        }
+
+        // 구독 승인
+        async function approveSubscription(subscriptionId) {
+            try {
+                const response = await apiClient.post(API_CONFIG.ENDPOINTS.ADMIN.APPROVE_SUB(subscriptionId));
+                if (response.success) {
+                    UIUtils.showToast('구독이 승인되었습니다', 'success');
+                    loadPendingSubscriptions();
+                    loadStats();
+                }
+            } catch (err) {
+                UIUtils.showToast('승인 실패: ' + err.message, 'error');
+            }
+        }
+
+        // 구독 거절
+        async function rejectSubscription(subscriptionId) {
+            const reason = prompt('거절 사유를 입력하세요:');
+            if (!reason) return;
+
+            try {
+                const response = await apiClient.post(API_CONFIG.ENDPOINTS.ADMIN.REJECT_SUB(subscriptionId), { reason });
+                if (response.success) {
+                    UIUtils.showToast('구독이 거절되었습니다', 'success');
+                    loadPendingSubscriptions();
+                    loadStats();
+                }
+            } catch (err) {
+                UIUtils.showToast('거절 실패: ' + err.message, 'error');
+            }
+        }
+
+        loadStats();
+        loadPendingSubscriptions();
+        setInterval(() => {
+            loadStats();
+            loadPendingSubscriptions();
+        }, 30000); // 30초마다 갱신
+    </script>
+</body>
+</html>

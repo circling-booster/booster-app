@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booster App - API 관리 플랫폼</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-rocket-takeoff"></i> Booster App
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">홈</a>
+                    </li>
+                    <li class="nav-item" id="nav-dashboard" style="display:none;">
+                        <a class="nav-link" href="pages/user/usage-dashboard.html">
+                            <i class="bi bi-graph-up"></i> 대시보드
+                        </a>
+                    </li>
+                    <li class="nav-item" id="nav-admin" style="display:none;">
+                        <a class="nav-link" href="pages/admin/users-management.html">
+                            <i class="bi bi-gear"></i> 관리자
+                        </a>
+                    </li>
+                    <li class="nav-item" id="nav-user-menu" style="display:none;">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i> <span id="username">사용자</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="pages/user/profile.html">프로필</a></li>
+                                <li><a class="dropdown-item" href="pages/user/api-keys.html">API 키</a></li>
+                                <li><a class="dropdown-item" href="pages/user/subscription.html">구독</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" id="logout-btn">로그아웃</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light" id="theme-toggle">
+                            <i class="bi bi-moon"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item" id="nav-auth-menu">
+                        <a class="btn btn-primary" href="pages/auth/login.html">로그인</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar (User) -->
+            <nav class="col-md-2 d-md-block bg-light sidebar" id="sidebar" style="display:none;">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="pages/user/usage-dashboard.html">
+                                <i class="bi bi-graph-up"></i> 사용량 대시보드
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="pages/user/api-keys.html">
+                                <i class="bi bi-key"></i> API 키 관리
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="pages/user/profile.html">
+                                <i class="bi bi-person"></i> 프로필
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="pages/user/subscription.html">
+                                <i class="bi bi-credit-card"></i> 구독
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="pages/user/webhooks.html">
+                                <i class="bi bi-webhook"></i> Webhook
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main -->
+            <main class="col-md-10 ms-sm-auto px-md-4">
+                <div class="row mt-5">
+                    <div class="col-lg-8 mx-auto">
+                        <!-- Welcome Section -->
+                        <div id="welcome-section">
+                            <h1 class="mb-4">Booster App에 오신 것을 환영합니다!</h1>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <p class="card-text">
+                                        Booster App은 강력한 API 관리 플랫폼입니다.
+                                    </p>
+                                    <p class="card-text">
+                                        <strong>주요 기능:</strong>
+                                    </p>
+                                    <ul>
+                                        <li>🔑 API 키 관리 및 발급</li>
+                                        <li>📊 실시간 사용량 모니터링</li>
+                                        <li>🎯 구독 관리 (Basic, Premium, Enterprise)</li>
+                                        <li>🔔 Webhook 지원</li>
+                                        <li>👤 사용자 프로필 관리</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <a href="pages/auth/login.html" class="btn btn-primary btn-lg">시작하기</a>
+                        </div>
+
+                        <!-- Dashboard Section (logged in) -->
+                        <div id="dashboard-section" style="display:none;">
+                            <h2>대시보드</h2>
+                            <div class="row mt-4">
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <i class="bi bi-graph-up text-primary"></i> 사용량
+                                            </h5>
+                                            <p class="card-text" id="usage-text">로딩 중...</p>
+                                            <a href="pages/user/usage-dashboard.html" class="btn btn-sm btn-primary">
+                                                상세 보기
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <i class="bi bi-key text-success"></i> API 키
+                                            </h5>
+                                            <p class="card-text" id="api-key-text">로딩 중...</p>
+                                            <a href="pages/user/api-keys.html" class="btn btn-sm btn-success">
+                                                관리하기
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <i class="bi bi-credit-card text-info"></i> 구독
+                                            </h5>
+                                            <p class="card-text" id="subscription-text">로딩 중...</p>
+                                            <a href="pages/user/subscription.html" class="btn btn-sm btn-info">
+                                                변경하기
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <i class="bi bi-webhook text-warning"></i> Webhook
+                                            </h5>
+                                            <p class="card-text" id="webhook-text">로딩 중...</p>
+                                            <a href="pages/user/webhooks.html" class="btn btn-sm btn-warning">
+                                                설정하기
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="assets/js/validation.js"></script>
+    <script src="assets/js/auth-manager.js"></script>
+    <script src="assets/js/api-client.js"></script>
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/chart-config.js"></script>
+    
+    <script>
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', async () => {
+            UIUtils.initDarkMode();
+            updateNavbar();
+            
+            // 로그인 상태면 대시보드 정보 로드
+            if (authManager.isLoggedIn()) {
+                loadDashboardData();
+            }
+        });
+
+        // 네비게이션 업데이트
+        function updateNavbar() {
+            const isLoggedIn = authManager.isLoggedIn();
+            const isAdmin = authManager.isAdmin();
+            
+            if (isLoggedIn) {
+                document.getElementById('nav-auth-menu').style.display = 'none';
+                document.getElementById('nav-user-menu').style.display = 'block';
+                document.getElementById('sidebar').style.display = 'block';
+                document.getElementById('welcome-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                
+                const userInfo = authManager.getUserInfo();
+                document.getElementById('username').textContent = 
+                    `${userInfo?.first_name || ''} ${userInfo?.last_name || ''}`;
+                
+                if (isAdmin) {
+                    document.getElementById('nav-admin').style.display = 'block';
+                }
+                document.getElementById('nav-dashboard').style.display = 'block';
+            }
+        }
+
+        // 대시보드 데이터 로드
+        async function loadDashboardData() {
+            try {
+                // TODO: 각 정보 로드
+            } catch (err) {
+                console.error('대시보드 로드 오류:', err);
+            }
+        }
+
+        // 로그아웃
+        document.getElementById('logout-btn')?.addEventListener('click', async (e) => {
+            e.preventDefault();
+            authManager.logout();
+            window.location.href = 'index.html';
+        });
+
+        // 다크모드 토글
+        document.getElementById('theme-toggle')?.addEventListener('click', () => {
+            UIUtils.toggleDarkMode();
+        });
+    </script>
+</body>
+</html>

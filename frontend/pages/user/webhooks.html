@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook - Booster App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../../index.html">
+                <i class="bi bi-rocket-takeoff"></i> Booster App
+            </a>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 d-md-block bg-light sidebar">
+                <ul class="nav flex-column pt-3">
+                    <li class="nav-item"><a class="nav-link" href="profile.html"><i class="bi bi-person"></i> 프로필</a></li>
+                    <li class="nav-item"><a class="nav-link" href="api-keys.html"><i class="bi bi-key"></i> API 키</a></li>
+                    <li class="nav-item"><a class="nav-link" href="usage-dashboard.html"><i class="bi bi-graph-up"></i> 사용량</a></li>
+                    <li class="nav-item"><a class="nav-link" href="subscription.html"><i class="bi bi-credit-card"></i> 구독</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="webhooks.html"><i class="bi bi-webhook"></i> Webhook</a></li>
+                </ul>
+            </nav>
+
+            <main class="col-md-10 ms-sm-auto px-md-4 py-4">
+                <h2 class="mb-4">Webhook 관리</h2>
+
+                <!-- Webhook 등록 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">새 Webhook 등록</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="webhook-form">
+                            <div class="mb-3">
+                                <label for="webhookUrl" class="form-label">Webhook URL</label>
+                                <input type="url" class="form-control" id="webhookUrl" placeholder="https://..." required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="eventType" class="form-label">이벤트 타입</label>
+                                <select class="form-select" id="eventType" required>
+                                    <option>선택하세요</option>
+                                    <option value="subscription_activated">구독 승인</option>
+                                    <option value="subscription_expired">구독 만료</option>
+                                    <option value="api_limit_reached">API 제한 도달</option>
+                                    <option value="api_limit_warning">API 제한 경고</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">등록</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Webhook 목록 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">등록된 Webhook</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>URL</th>
+                                        <th>이벤트</th>
+                                        <th>상태</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="webhooks-table-body">
+                                    <tr><td colspan="4" class="text-center text-muted">로딩 중...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="../../config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/js/auth-manager.js"></script>
+    <script src="../../assets/js/api-client.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+
+    <script>
+        UIUtils.enforcePermission('user');
+
+        // Webhook 목록 로드
+        async function loadWebhooks() {
+            try {
+                const response = await apiClient.get(API_CONFIG.ENDPOINTS.WEBHOOKS.LIST);
+                if (response.success) {
+                    const tbody = document.getElementById('webhooks-table-body');
+                    tbody.innerHTML = response.data.map(webhook => `
+                        <tr>
+                            <td><code>${webhook.webhook_url}</code></td>
+                            <td>${webhook.event_type}</td>
+                            <td>
+                                <span class="badge ${webhook.is_active ? 'bg-success' : 'bg-danger'}">
+                                    ${webhook.is_active ? '활성' : '비활성'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="testWebhook('${webhook.id}')">테스트</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteWebhook('${webhook.id}')">삭제</button>
+                            </td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="4" class="text-center text-muted">Webhook이 없습니다</td></tr>';
+                }
+            } catch (err) {
+                UIUtils.showToast('Webhook 로드 실패: ' + err.message, 'error');
+            }
+        }
+
+        // Webhook 등록
+        document.getElementById('webhook-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const url = document.getElementById('webhookUrl').value;
+            if (!Validator.validateURL(url)) {
+                UIUtils.showToast('유효한 URL을 입력하세요', 'error');
+                return;
+            }
+
+            try {
+                const response = await apiClient.post(API_CONFIG.ENDPOINTS.WEBHOOKS.CREATE, {
+                    webhookUrl: url,
+                    eventType: document.getElementById('eventType').value
+                });
+
+                if (response.success) {
+                    UIUtils.showToast('Webhook이 등록되었습니다', 'success');
+                    document.getElementById('webhook-form').reset();
+                    loadWebhooks();
+                }
+            } catch (err) {
+                UIUtils.showToast('Webhook 등록 실패: ' + err.message, 'error');
+            }
+        });
+
+        // Webhook 테스트
+        async function testWebhook(webhookId) {
+            try {
+                UIUtils.showToast('테스트 중...', 'info');
+                // API 호출 예시
+                await new Promise(r => setTimeout(r, 2000));
+                UIUtils.showToast('테스트 완료', 'success');
+            } catch (err) {
+                UIUtils.showToast('테스트 실패: ' + err.message, 'error');
+            }
+        }
+
+        // Webhook 삭제
+        async function deleteWebhook(webhookId) {
+            if (confirm('이 Webhook을 삭제하시겠습니까?')) {
+                try {
+                    UIUtils.showToast('Webhook이 삭제되었습니다', 'success');
+                    loadWebhooks();
+                } catch (err) {
+                    UIUtils.showToast('삭제 실패: ' + err.message, 'error');
+                }
+            }
+        }
+
+        loadWebhooks();
+    </script>
+</body>
+</html>

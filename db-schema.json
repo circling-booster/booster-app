@@ -1,0 +1,1660 @@
+{
+  "database": "booster_db",
+  "exportedAt": "2025-12-18T04:24:26.830Z",
+  "tables": [
+    {
+      "name": "ApiKeys",
+      "schema": "dbo",
+      "columns": [
+        {
+          "name": "id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 1
+        },
+        {
+          "name": "user_id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 2
+        },
+        {
+          "name": "key_name",
+          "dataType": "nvarchar",
+          "maxLength": 100,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 3
+        },
+        {
+          "name": "api_key",
+          "dataType": "nvarchar",
+          "maxLength": 100,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 4
+        },
+        {
+          "name": "api_secret_hash",
+          "dataType": "nvarchar",
+          "maxLength": 64,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 5
+        },
+        {
+          "name": "is_active",
+          "dataType": "bit",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "((1))",
+          "position": 6
+        },
+        {
+          "name": "last_used",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 7
+        },
+        {
+          "name": "ip_whitelist",
+          "dataType": "nvarchar",
+          "maxLength": -1,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 8
+        },
+        {
+          "name": "created_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "(getdate())",
+          "position": 9
+        },
+        {
+          "name": "expires_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 10
+        }
+      ],
+      "primaryKey": null
+    },
+    {
+      "name": "ApiLogs",
+      "schema": "dbo",
+      "columns": [
+        {
+          "name": "id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 1
+        },
+        {
+          "name": "api_key_id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 2
+        },
+        {
+          "name": "user_id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 3
+        },
+        {
+          "name": "endpoint",
+          "dataType": "nvarchar",
+          "maxLength": 255,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 4
+        },
+        {
+          "name": "method",
+          "dataType": "nvarchar",
+          "maxLength": 10,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 5
+        },
+        {
+          "name": "status_code",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 6
+        },
+        {
+          "name": "response_time_ms",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 7
+        },
+        {
+          "name": "ip_address",
+          "dataType": "nvarchar",
+          "maxLength": 50,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 8
+        },
+        {
+          "name": "request_body",
+          "dataType": "nvarchar",
+          "maxLength": -1,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 9
+        },
+        {
+          "name": "error_message",
+          "dataType": "nvarchar",
+          "maxLength": -1,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 10
+        },
+        {
+          "name": "created_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "(getdate())",
+          "position": 11
+        }
+      ],
+      "primaryKey": null
+    },
+    {
+      "name": "RateLimitLogs",
+      "schema": "dbo",
+      "columns": [
+        {
+          "name": "id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 1
+        },
+        {
+          "name": "api_key_id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 2
+        },
+        {
+          "name": "user_id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 3
+        },
+        {
+          "name": "ip_address",
+          "dataType": "nvarchar",
+          "maxLength": 50,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 4
+        },
+        {
+          "name": "limit_type",
+          "dataType": "nvarchar",
+          "maxLength": 20,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 5
+        },
+        {
+          "name": "reset_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 6
+        },
+        {
+          "name": "created_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "(getdate())",
+          "position": 7
+        }
+      ],
+      "primaryKey": null
+    },
+    {
+      "name": "SubscriptionTiers",
+      "schema": "dbo",
+      "columns": [
+        {
+          "name": "id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 1
+        },
+        {
+          "name": "tier_name",
+          "dataType": "nvarchar",
+          "maxLength": 50,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 2
+        },
+        {
+          "name": "description",
+          "dataType": "nvarchar",
+          "maxLength": -1,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 3
+        },
+        {
+          "name": "api_call_limit",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 4
+        },
+        {
+          "name": "price_usd",
+          "dataType": "decimal",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 2,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 5
+        },
+        {
+          "name": "created_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "(getdate())",
+          "position": 6
+        }
+      ],
+      "primaryKey": null
+    },
+    {
+      "name": "Users",
+      "schema": "dbo",
+      "columns": [
+        {
+          "name": "id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 1
+        },
+        {
+          "name": "first_name",
+          "dataType": "nvarchar",
+          "maxLength": 100,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 2
+        },
+        {
+          "name": "last_name",
+          "dataType": "nvarchar",
+          "maxLength": 100,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 3
+        },
+        {
+          "name": "email",
+          "dataType": "nvarchar",
+          "maxLength": 255,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 4
+        },
+        {
+          "name": "phone_number",
+          "dataType": "nvarchar",
+          "maxLength": 20,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 5
+        },
+        {
+          "name": "password_hash",
+          "dataType": "nvarchar",
+          "maxLength": -1,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 6
+        },
+        {
+          "name": "is_admin",
+          "dataType": "bit",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "((0))",
+          "position": 7
+        },
+        {
+          "name": "is_active",
+          "dataType": "bit",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "((1))",
+          "position": 8
+        },
+        {
+          "name": "is_blocked",
+          "dataType": "bit",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "((0))",
+          "position": 9
+        },
+        {
+          "name": "blocked_reason",
+          "dataType": "nvarchar",
+          "maxLength": -1,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 10
+        },
+        {
+          "name": "created_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "(getdate())",
+          "position": 11
+        },
+        {
+          "name": "updated_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 12
+        },
+        {
+          "name": "last_login",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 13
+        }
+      ],
+      "primaryKey": null
+    },
+    {
+      "name": "UserSubscriptions",
+      "schema": "dbo",
+      "columns": [
+        {
+          "name": "id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 1
+        },
+        {
+          "name": "user_id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 2
+        },
+        {
+          "name": "tier_id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 3
+        },
+        {
+          "name": "status",
+          "dataType": "nvarchar",
+          "maxLength": 20,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "('pending')",
+          "position": 4
+        },
+        {
+          "name": "start_date",
+          "dataType": "date",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 5
+        },
+        {
+          "name": "end_date",
+          "dataType": "date",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 6
+        },
+        {
+          "name": "approval_date",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 7
+        },
+        {
+          "name": "approved_by",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 8
+        },
+        {
+          "name": "rejection_reason",
+          "dataType": "nvarchar",
+          "maxLength": -1,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 9
+        },
+        {
+          "name": "auto_renewal",
+          "dataType": "bit",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "((1))",
+          "position": 10
+        },
+        {
+          "name": "created_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "(getdate())",
+          "position": 11
+        },
+        {
+          "name": "updated_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 12
+        }
+      ],
+      "primaryKey": null
+    },
+    {
+      "name": "WebhookLogs",
+      "schema": "dbo",
+      "columns": [
+        {
+          "name": "id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 1
+        },
+        {
+          "name": "webhook_id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 2
+        },
+        {
+          "name": "event_type",
+          "dataType": "nvarchar",
+          "maxLength": 50,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 3
+        },
+        {
+          "name": "event_data",
+          "dataType": "nvarchar",
+          "maxLength": -1,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 4
+        },
+        {
+          "name": "status_code",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 5
+        },
+        {
+          "name": "response_body",
+          "dataType": "nvarchar",
+          "maxLength": -1,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 6
+        },
+        {
+          "name": "attempt_number",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": false,
+          "defaultValue": "((1))",
+          "position": 7
+        },
+        {
+          "name": "next_retry_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 8
+        },
+        {
+          "name": "error_message",
+          "dataType": "nvarchar",
+          "maxLength": -1,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 9
+        },
+        {
+          "name": "created_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "(getdate())",
+          "position": 10
+        }
+      ],
+      "primaryKey": null
+    },
+    {
+      "name": "Webhooks",
+      "schema": "dbo",
+      "columns": [
+        {
+          "name": "id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 1
+        },
+        {
+          "name": "user_id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 2
+        },
+        {
+          "name": "webhook_url",
+          "dataType": "nvarchar",
+          "maxLength": 500,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 3
+        },
+        {
+          "name": "event_type",
+          "dataType": "nvarchar",
+          "maxLength": 50,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 4
+        },
+        {
+          "name": "is_active",
+          "dataType": "bit",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "((1))",
+          "position": 5
+        },
+        {
+          "name": "secret_token",
+          "dataType": "nvarchar",
+          "maxLength": 255,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 6
+        },
+        {
+          "name": "retry_count",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": false,
+          "defaultValue": "((3))",
+          "position": 7
+        },
+        {
+          "name": "timeout_ms",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": false,
+          "defaultValue": "((5000))",
+          "position": 8
+        },
+        {
+          "name": "created_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "(getdate())",
+          "position": 9
+        },
+        {
+          "name": "updated_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 10
+        }
+      ],
+      "primaryKey": null
+    }
+  ],
+  "views": [
+    {
+      "name": "vw_ApiStatistics",
+      "schema": "dbo",
+      "columns": [
+        {
+          "name": "endpoint",
+          "dataType": "nvarchar",
+          "maxLength": 255,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 1
+        },
+        {
+          "name": "method",
+          "dataType": "nvarchar",
+          "maxLength": 10,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 2
+        },
+        {
+          "name": "total_calls",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 3
+        },
+        {
+          "name": "avg_response_time",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 4
+        },
+        {
+          "name": "min_response_time",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 5
+        },
+        {
+          "name": "max_response_time",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 6
+        },
+        {
+          "name": "successful",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 7
+        },
+        {
+          "name": "failed",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 8
+        }
+      ]
+    },
+    {
+      "name": "vw_UserApiUsage",
+      "schema": "dbo",
+      "columns": [
+        {
+          "name": "id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 1
+        },
+        {
+          "name": "first_name",
+          "dataType": "nvarchar",
+          "maxLength": 100,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 2
+        },
+        {
+          "name": "last_name",
+          "dataType": "nvarchar",
+          "maxLength": 100,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 3
+        },
+        {
+          "name": "email",
+          "dataType": "nvarchar",
+          "maxLength": 255,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 4
+        },
+        {
+          "name": "tier_name",
+          "dataType": "nvarchar",
+          "maxLength": 50,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 5
+        },
+        {
+          "name": "monthly_api_limit",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 6
+        },
+        {
+          "name": "api_calls_this_month",
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 7
+        },
+        {
+          "name": "usage_percentage",
+          "dataType": "float",
+          "maxLength": null,
+          "precision": 53,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 8
+        }
+      ]
+    },
+    {
+      "name": "vw_UserSubscriptionStatus",
+      "schema": "dbo",
+      "columns": [
+        {
+          "name": "id",
+          "dataType": "nvarchar",
+          "maxLength": 36,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 1
+        },
+        {
+          "name": "first_name",
+          "dataType": "nvarchar",
+          "maxLength": 100,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 2
+        },
+        {
+          "name": "last_name",
+          "dataType": "nvarchar",
+          "maxLength": 100,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 3
+        },
+        {
+          "name": "email",
+          "dataType": "nvarchar",
+          "maxLength": 255,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 4
+        },
+        {
+          "name": "tier_name",
+          "dataType": "nvarchar",
+          "maxLength": 50,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 5
+        },
+        {
+          "name": "status",
+          "dataType": "nvarchar",
+          "maxLength": 20,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 6
+        },
+        {
+          "name": "start_date",
+          "dataType": "date",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 7
+        },
+        {
+          "name": "end_date",
+          "dataType": "date",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 8
+        },
+        {
+          "name": "created_at",
+          "dataType": "datetime2",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": true,
+          "defaultValue": null,
+          "position": 9
+        },
+        {
+          "name": "is_active",
+          "dataType": "bit",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 10
+        },
+        {
+          "name": "is_blocked",
+          "dataType": "bit",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": null,
+          "position": 11
+        }
+      ]
+    }
+  ],
+  "storedProcedures": [
+    {
+      "name": "sp_AnalyzeApiPerformance",
+      "schema": "dbo",
+      "parameters": [
+        {
+          "name": "@Days",
+          "dataType": "int",
+          "maxLength": null,
+          "mode": "IN"
+        }
+      ],
+      "definition": "CREATE PROCEDURE sp_AnalyzeApiPerformance @Days INT = 7\r\nAS\r\nBEGIN\r\n    SET NOCOUNT ON;\r\n    SELECT [endpoint], [method], COUNT(*) as [Total Calls], AVG([response_time_ms]) as [Avg Response Time (ms)],\r\n           MIN([response_time_ms]) as [Min], MAX([response_time_ms]) as [Max],\r\n           SUM(CASE WHEN [status_code] >= 200 AND [status_code] < 300 THEN 1 ELSE 0 END) as [Success],\r\n           SUM(CASE WHEN [status_code] >= 400 THEN 1 ELSE 0 END) as [Failures]\r\n    FROM [ApiLogs]\r\n    WHERE [created_at] > DATEADD(DAY, -@Days, GETDATE())\r\n    GROUP BY [endpoint], [method]\r\n    ORDER BY [Total Calls] DESC;\r\nEND;"
+    },
+    {
+      "name": "sp_CleanupOldLogs",
+      "schema": "dbo",
+      "parameters": [
+        {
+          "name": "@DaysToKeep",
+          "dataType": "int",
+          "maxLength": null,
+          "mode": "IN"
+        }
+      ],
+      "definition": "CREATE PROCEDURE sp_CleanupOldLogs @DaysToKeep INT = 90\r\nAS\r\nBEGIN\r\n    SET NOCOUNT ON;\r\n    BEGIN TRANSACTION;\r\n    BEGIN TRY\r\n        DELETE FROM [WebhookLogs] WHERE [created_at] < DATEADD(DAY, -@DaysToKeep, GETDATE());\r\n        DELETE FROM [ApiLogs] WHERE [created_at] < DATEADD(DAY, -@DaysToKeep, GETDATE());\r\n        DELETE FROM [RateLimitLogs] WHERE [created_at] < DATEADD(DAY, -30, GETDATE());\r\n        PRINT 'Cleanup completed successfully';\r\n        COMMIT TRANSACTION;\r\n    END TRY\r\n    BEGIN CATCH\r\n        ROLLBACK TRANSACTION;\r\n        PRINT 'Error: ' + ERROR_MESSAGE();\r\n        THROW;\r\n    END CATCH;\r\nEND;"
+    },
+    {
+      "name": "sp_GetDatabaseSize",
+      "schema": "dbo",
+      "parameters": [],
+      "definition": "CREATE PROCEDURE sp_GetDatabaseSize\r\nAS\r\nBEGIN\r\n    SET NOCOUNT ON;\r\n    SELECT name, size/1024.0 as [Size (MB)], FILEPROPERTY(name, 'SpaceUsed')/1024.0 as [Used Space (MB)]\r\n    FROM sys.database_files;\r\n    \r\n    SELECT t.name as [Table], ps.row_count as [Row Count], \r\n           CAST(ps.reserved_page_count * 8 / 1024.0 AS DECIMAL(10,2)) as [Size (MB)]\r\n    FROM sys.tables t\r\n    JOIN sys.dm_db_partition_stats ps ON t.object_id = ps.object_id\r\n    WHERE ps.index_id = 0\r\n    ORDER BY ps.reserved_page_count DESC;\r\nEND;"
+    },
+    {
+      "name": "sp_GetTableRowCounts",
+      "schema": "dbo",
+      "parameters": [],
+      "definition": "CREATE PROCEDURE sp_GetTableRowCounts\r\nAS\r\nBEGIN\r\n    SET NOCOUNT ON;\r\n    SELECT t.name as [Table Name], ps.row_count as [Row Count],\r\n           CAST(ps.reserved_page_count * 8 / 1024.0 AS DECIMAL(10,2)) as [Size (MB)]\r\n    FROM sys.tables t\r\n    JOIN sys.dm_db_partition_stats ps ON t.object_id = ps.object_id\r\n    WHERE ps.index_id = 0\r\n    ORDER BY ps.row_count DESC;\r\nEND;"
+    },
+    {
+      "name": "sp_ValidateIntegrity",
+      "schema": "dbo",
+      "parameters": [],
+      "definition": "CREATE PROCEDURE sp_ValidateIntegrity\r\nAS\r\nBEGIN\r\n    SET NOCOUNT ON;\r\n    PRINT '=== Data Integrity Check ===';\r\n    SELECT COUNT(*) as [Orphaned UserSubscriptions] FROM [UserSubscriptions] us\r\n    WHERE NOT EXISTS (SELECT 1 FROM [Users] WHERE [id] = us.[user_id]);\r\n    PRINT 'Integrity check completed';\r\nEND;"
+    }
+  ],
+  "triggers": [
+    {
+      "name": "tr_Users_UpdatedAt",
+      "tableName": "Users",
+      "type": "SQL_TRIGGER"
+    },
+    {
+      "name": "tr_UserSubscriptions_UpdatedAt",
+      "tableName": "UserSubscriptions",
+      "type": "SQL_TRIGGER"
+    },
+    {
+      "name": "tr_Webhooks_UpdatedAt",
+      "tableName": "Webhooks",
+      "type": "SQL_TRIGGER"
+    }
+  ],
+  "indexes": [
+    {
+      "tableName": "ApiKeys",
+      "name": "IX_ApiKeys_ApiKey",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "api_key"
+      ]
+    },
+    {
+      "tableName": "ApiKeys",
+      "name": "IX_ApiKeys_UserId_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "user_id",
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "ApiKeys",
+      "name": "IX_ApiKeys_UserId_IsActive",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "user_id",
+        "is_active"
+      ]
+    },
+    {
+      "tableName": "ApiKeys",
+      "name": "PK__ApiKeys__3213E83F176B9B57",
+      "type": "CLUSTERED",
+      "columns": [
+        "id"
+      ]
+    },
+    {
+      "tableName": "ApiKeys",
+      "name": "UQ__ApiKeys__A2D784409D355143",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "api_key"
+      ]
+    },
+    {
+      "tableName": "ApiLogs",
+      "name": "IX_ApiLogs_ApiKeyId_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "api_key_id",
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "ApiLogs",
+      "name": "IX_ApiLogs_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "ApiLogs",
+      "name": "IX_ApiLogs_Endpoint_StatusCode",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "endpoint",
+        "status_code"
+      ]
+    },
+    {
+      "tableName": "ApiLogs",
+      "name": "IX_ApiLogs_UserId_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "user_id",
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "ApiLogs",
+      "name": "PK__ApiLogs__3213E83F76996599",
+      "type": "CLUSTERED",
+      "columns": [
+        "id"
+      ]
+    },
+    {
+      "tableName": "RateLimitLogs",
+      "name": "IX_RateLimitLogs_ApiKeyId_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "api_key_id",
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "RateLimitLogs",
+      "name": "IX_RateLimitLogs_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "RateLimitLogs",
+      "name": "IX_RateLimitLogs_IpAddress_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "ip_address",
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "RateLimitLogs",
+      "name": "PK__RateLimi__3213E83FB0CE23F0",
+      "type": "CLUSTERED",
+      "columns": [
+        "id"
+      ]
+    },
+    {
+      "tableName": "SubscriptionTiers",
+      "name": "IX_SubscriptionTiers_TierName",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "tier_name"
+      ]
+    },
+    {
+      "tableName": "SubscriptionTiers",
+      "name": "PK__Subscrip__3213E83F82FFBD30",
+      "type": "CLUSTERED",
+      "columns": [
+        "id"
+      ]
+    },
+    {
+      "tableName": "SubscriptionTiers",
+      "name": "UQ__Subscrip__10845677992E77D2",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "tier_name"
+      ]
+    },
+    {
+      "tableName": "Users",
+      "name": "IX_Users_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "Users",
+      "name": "IX_Users_Email",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "email"
+      ]
+    },
+    {
+      "tableName": "Users",
+      "name": "IX_Users_IsAdmin_IsBlocked",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "is_admin",
+        "is_blocked"
+      ]
+    },
+    {
+      "tableName": "Users",
+      "name": "PK__Users__3213E83F83174B84",
+      "type": "CLUSTERED",
+      "columns": [
+        "id"
+      ]
+    },
+    {
+      "tableName": "Users",
+      "name": "UQ__Users__AB6E61646DAD8717",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "email"
+      ]
+    },
+    {
+      "tableName": "UserSubscriptions",
+      "name": "IX_UserSubscriptions_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "UserSubscriptions",
+      "name": "IX_UserSubscriptions_Status_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "status",
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "UserSubscriptions",
+      "name": "IX_UserSubscriptions_TierId",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "tier_id"
+      ]
+    },
+    {
+      "tableName": "UserSubscriptions",
+      "name": "IX_UserSubscriptions_UserId_Status",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "user_id",
+        "status"
+      ]
+    },
+    {
+      "tableName": "UserSubscriptions",
+      "name": "PK__UserSubs__3213E83FA1520E78",
+      "type": "CLUSTERED",
+      "columns": [
+        "id"
+      ]
+    },
+    {
+      "tableName": "WebhookLogs",
+      "name": "IX_WebhookLogs_EventType_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "event_type",
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "WebhookLogs",
+      "name": "IX_WebhookLogs_NextRetryAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "next_retry_at"
+      ]
+    },
+    {
+      "tableName": "WebhookLogs",
+      "name": "IX_WebhookLogs_StatusCode_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "status_code",
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "WebhookLogs",
+      "name": "IX_WebhookLogs_WebhookId_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "webhook_id",
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "WebhookLogs",
+      "name": "PK__WebhookL__3213E83FE96354F0",
+      "type": "CLUSTERED",
+      "columns": [
+        "id"
+      ]
+    },
+    {
+      "tableName": "Webhooks",
+      "name": "IX_Webhooks_CreatedAt",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "created_at"
+      ]
+    },
+    {
+      "tableName": "Webhooks",
+      "name": "IX_Webhooks_EventType_IsActive",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "event_type",
+        "is_active"
+      ]
+    },
+    {
+      "tableName": "Webhooks",
+      "name": "IX_Webhooks_UserId_IsActive",
+      "type": "NONCLUSTERED",
+      "columns": [
+        "user_id",
+        "is_active"
+      ]
+    },
+    {
+      "tableName": "Webhooks",
+      "name": "PK__Webhooks__3213E83F4BA907AB",
+      "type": "CLUSTERED",
+      "columns": [
+        "id"
+      ]
+    }
+  ],
+  "foreignKeys": [
+    {
+      "name": "FK_ApiKeys_Users",
+      "tableName": "ApiKeys",
+      "columnName": "user_id",
+      "referencedTable": "Users",
+      "referencedColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "name": "FK_ApiLogs_ApiKeys",
+      "tableName": "ApiLogs",
+      "columnName": "api_key_id",
+      "referencedTable": "ApiKeys",
+      "referencedColumn": "id",
+      "onDelete": "SET NULL",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "name": "FK_ApiLogs_Users",
+      "tableName": "ApiLogs",
+      "columnName": "user_id",
+      "referencedTable": "Users",
+      "referencedColumn": "id",
+      "onDelete": "NO ACTION",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "name": "FK_RateLimitLogs_ApiKeys",
+      "tableName": "RateLimitLogs",
+      "columnName": "api_key_id",
+      "referencedTable": "ApiKeys",
+      "referencedColumn": "id",
+      "onDelete": "SET NULL",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "name": "FK_RateLimitLogs_Users",
+      "tableName": "RateLimitLogs",
+      "columnName": "user_id",
+      "referencedTable": "Users",
+      "referencedColumn": "id",
+      "onDelete": "NO ACTION",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "name": "FK_UserSubscriptions_SubscriptionTiers",
+      "tableName": "UserSubscriptions",
+      "columnName": "tier_id",
+      "referencedTable": "SubscriptionTiers",
+      "referencedColumn": "id",
+      "onDelete": "NO ACTION",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "name": "FK_UserSubscriptions_Users",
+      "tableName": "UserSubscriptions",
+      "columnName": "user_id",
+      "referencedTable": "Users",
+      "referencedColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "name": "FK_WebhookLogs_Webhooks",
+      "tableName": "WebhookLogs",
+      "columnName": "webhook_id",
+      "referencedTable": "Webhooks",
+      "referencedColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "name": "FK_Webhooks_Users",
+      "tableName": "Webhooks",
+      "columnName": "user_id",
+      "referencedTable": "Users",
+      "referencedColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    }
+  ],
+  "constraints": [
+    {
+      "name": "PK__ApiKeys__3213E83F176B9B57",
+      "tableName": "ApiKeys",
+      "type": "PRIMARY KEY"
+    },
+    {
+      "name": "UQ__ApiKeys__A2D784409D355143",
+      "tableName": "ApiKeys",
+      "type": "UNIQUE"
+    },
+    {
+      "name": "PK__ApiLogs__3213E83F76996599",
+      "tableName": "ApiLogs",
+      "type": "PRIMARY KEY"
+    },
+    {
+      "name": "PK__RateLimi__3213E83FB0CE23F0",
+      "tableName": "RateLimitLogs",
+      "type": "PRIMARY KEY"
+    },
+    {
+      "name": "CK_RateLimitLogs_LimitType",
+      "tableName": "RateLimitLogs",
+      "type": "CHECK"
+    },
+    {
+      "name": "UQ__Subscrip__10845677992E77D2",
+      "tableName": "SubscriptionTiers",
+      "type": "UNIQUE"
+    },
+    {
+      "name": "PK__Subscrip__3213E83F82FFBD30",
+      "tableName": "SubscriptionTiers",
+      "type": "PRIMARY KEY"
+    },
+    {
+      "name": "PK__Users__3213E83F83174B84",
+      "tableName": "Users",
+      "type": "PRIMARY KEY"
+    },
+    {
+      "name": "UQ__Users__AB6E61646DAD8717",
+      "tableName": "Users",
+      "type": "UNIQUE"
+    },
+    {
+      "name": "CK_UserSubscriptions_Status",
+      "tableName": "UserSubscriptions",
+      "type": "CHECK"
+    },
+    {
+      "name": "PK__UserSubs__3213E83FA1520E78",
+      "tableName": "UserSubscriptions",
+      "type": "PRIMARY KEY"
+    },
+    {
+      "name": "PK__WebhookL__3213E83FE96354F0",
+      "tableName": "WebhookLogs",
+      "type": "PRIMARY KEY"
+    },
+    {
+      "name": "PK__Webhooks__3213E83F4BA907AB",
+      "tableName": "Webhooks",
+      "type": "PRIMARY KEY"
+    }
+  ]
+}
