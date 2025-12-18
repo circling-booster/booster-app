@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Key 검증 테스터</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .environment-info {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .environment-info strong {
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-size: 13px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-validate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-validate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-validate:active {
+            transform: translateY(0);
+        }
+
+        .btn-clear {
+            background: #f5f5f5;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .btn-clear:hover {
+            background: #efefef;
+        }
+
+        .response-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .response-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .response-box {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #333;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .response-box.success {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+
+        .response-box.error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .history-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .history-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .history-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            background: #f8f8f8;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-time {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .history-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .history-status.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .history-status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 20px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 API Key 검증 테스터</h1>
+            <p>API Key와 Secret을 검증하고 결과를 확인하세요</p>
+        </header>
+
+        <div class="content">
+            <!-- 환경 정보 -->
+            <div class="environment-info" id="envInfo">
+                <strong>환경:</strong> <span id="envName">감지 중...</span> | 
+                <strong>Base URL:</strong> <span id="baseUrl">감지 중...</span>
+            </div>
+
+            <!-- 검증 폼 -->
+            <form id="validationForm">
+                <div class="form-group">
+                    <label for="apiKey">API Key *</label>
+                    <input 
+                        type="text" 
+                        id="apiKey" 
+                        placeholder="sk_abc123def456..." 
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="apiSecret">API Secret *</label>
+                    <textarea 
+                        id="apiSecret" 
+                        placeholder="a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6..." 
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-validate">검증 요청</button>
+                    <button type="reset" class="btn-clear">초기화</button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>검증 중...</p>
+                </div>
+            </form>
+
+            <!-- 응답 표시 -->
+            <div class="response-section" id="responseSection" style="display: none;">
+                <h3>📋 응답 결과</h3>
+                <div id="responseBox" class="response-box"></div>
+            </div>
+
+            <!-- 요청/응답 히스토리 -->
+            <div class="history-section">
+                <h3>📊 요청 히스토리 (최근 10개)</h3>
+                <div class="history-list" id="historyList">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <p>아직 검증 요청이 없습니다</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 환경 자동 감지
+        function detectEnvironment() {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            const port = window.location.port;
+            
+            let baseUrl;
+            let envName;
+
+            // 로컬 개발 환경 감지
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                baseUrl = `http://localhost:3000`;
+                envName = '로컬 개발 (localhost:3000)';
+            }
+            // Live Server (VS Code)
+            else if (hostname === 'localhost' && port === '5500') {
+                baseUrl = `http://localhost:3000`;
+                envName = '로컬 개발 (Live Server)';
+            }
+            // Azure 배포 환경
+            else if (hostname.includes('azurewebsites.net')) {
+                baseUrl = `${protocol}//${hostname}`;
+                envName = 'Azure Web App';
+            }
+            // 기타 환경
+            else {
+                baseUrl = `${protocol}//${hostname}${port ? ':' + port : ''}`;
+                envName = 'Custom Environment';
+            }
+
+            document.getElementById('envName').textContent = envName;
+            document.getElementById('baseUrl').textContent = baseUrl;
+
+            return baseUrl;
+        }
+
+        let baseUrl = detectEnvironment();
+        let requestHistory = [];
+
+        // 폼 제출 이벤트
+        document.getElementById('validationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const apiSecret = document.getElementById('apiSecret').value.trim();
+
+            if (!apiKey || !apiSecret) {
+                alert('API Key와 Secret을 입력하세요');
+                return;
+            }
+
+            // 로딩 표시
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('responseSection').style.display = 'none';
+
+            try {
+                const startTime = Date.now();
+
+                const response = await fetch(`${baseUrl}/api/validate-key`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        api_key: apiKey,
+                        api_secret: apiSecret
+                    })
+                });
+
+                const responseTime = Date.now() - startTime;
+                const data = await response.json();
+
+                // 히스토리에 추가
+                const timestamp = new Date().toISOString();
+                requestHistory.unshift({
+                    timestamp,
+                    apiKey: apiKey.substring(0, 15) + '...',
+                    status: response.status,
+                    success: data.success,
+                    message: data.message,
+                    responseTime
+                });
+
+                if (requestHistory.length > 10) {
+                    requestHistory = requestHistory.slice(0, 10);
+                }
+
+                // 응답 표시
+                displayResponse(data, response.status, responseTime);
+                updateHistory();
+
+            } catch (error) {
+                console.error('요청 오류:', error);
+                alert(`요청 오류: ${error.message}`);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        });
+
+        // 응답 표시
+        function displayResponse(data, status, responseTime) {
+            const responseBox = document.getElementById('responseBox');
+            const isSuccess = status === 200;
+
+            responseBox.classList.remove('success', 'error');
+            responseBox.classList.add(isSuccess ? 'success' : 'error');
+
+            const response = {
+                status,
+                responseTime: `${responseTime}ms`,
+                data
+            };
+
+            responseBox.textContent = JSON.stringify(response, null, 2);
+            document.getElementById('responseSection').style.display = 'block';
+        }
+
+        // 히스토리 업데이트
+        function updateHistory() {
+            const historyList = document.getElementById('historyList');
+
+            if (requestHistory.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <p>아직 검증 요청이 없습니다</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyList.innerHTML = requestHistory.map((item, index) => `
+                <div class="history-item" onclick="loadHistoryItem(${index})">
+                    <div class="history-time">${new Date(item.timestamp).toLocaleTimeString('ko-KR')}</div>
+                    <div>
+                        API Key: ${item.apiKey}
+                        <span class="history-status ${item.success ? 'success' : 'error'}">
+                            ${item.success ? '성공' : '실패'}
+                        </span>
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                        응답: ${item.status} | 시간: ${item.responseTime}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 히스토리 아이템 클릭
+        function loadHistoryItem(index) {
+            const item = requestHistory[index];
+            document.getElementById('apiKey').value = item.apiKey + '...';
+            // 일부만 표시되므로 전체 검증을 위해서는 전체 key를 저장해야 함
+        }
+
+        // 초기 환경 감지
+        window.addEventListener('load', () => {
+            console.log('API Validation Tester 로드됨');
+            console.log('Base URL:', baseUrl);
+        });
+    </script>
+</body>
+</html>

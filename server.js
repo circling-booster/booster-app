@@ -17,6 +17,7 @@ const apiKeyRoutes = require('./routes/apiKeyRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
+const validateApiKeyRoutes = require('./routes/validateApiKeyRoutes');
 
 
 const app = express();
@@ -42,6 +43,14 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+//API 용 모든 origin COrs
+app.use('/api/validate-key', cors({
+    origin: '*',  // ✅ 이 경로에서만 모든 Origin 허용
+    methods: ['POST'],
+    allowedHeaders: ['Content-Type']
+}));
+
 
 app.use(morgan('combined')); // 로그 기록
 app.use(ipLimiter); // IP 기반 Rate Limiting
@@ -69,6 +78,7 @@ app.use('/api', adminRoutes);        // /api/admin/...
 app.use('/api', dashboardRoutes);    // /api/dashboard/...
 app.use('/api', webhookRoutes);      // /api/webhooks/...
 
+app.use('/api', validateApiKeyRoutes);
 // --- 4. 프론트엔드 정적 파일 서빙 (중요) ---
 // frontend 폴더를 정적 파일 루트로 설정
 app.use(express.static(path.join(__dirname, 'frontend')));
