@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 이미지 분석 로그 모니터링 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .filter-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .filter-panel h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group label {
+            display: block;
+            color: #555;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .content-area {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            background: #f9f9f9;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-button:hover {
+            background: #f0f0f0;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card.info {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table thead {
+            background: #f9f9f9;
+            border-bottom: 2px solid #eee;
+        }
+
+        table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-slow {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .export-buttons button {
+            padding: 10px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .export-buttons button:hover {
+            background: #5568d3;
+        }
+
+        .filter-info {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .top-errors {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .error-item {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 5px;
+            border-left: 4px solid #f5576c;
+        }
+
+        .error-message-text {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+
+        .error-count {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .response-time-distribution {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .distribution-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .distribution-bar {
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            height: 150px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .distribution-bar.slow {
+            background: linear-gradient(180deg, #f5576c 0%, #f093fb 100%);
+        }
+
+        .distribution-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .distribution-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .slow-requests-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .slow-request-item {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 5px;
+            border-left: 4px solid #f5576c;
+        }
+
+        .slow-request-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .slow-request-time {
+            font-weight: 600;
+            color: #f5576c;
+        }
+
+        .slow-request-details {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-panel {
+                position: static;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab-button {
+                flex: 0 1 auto;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 이미지 분석 로그 모니터링 대시보드</h1>
+            <p>이미지 처리 API의 성능을 실시간으로 분석하고 모니터링합니다</p>
+        </div>
+
+        <div class="main-layout">
+            <!-- 좌측: 필터 패널 -->
+            <div class="filter-panel">
+                <h3>🔍 필터 설정</h3>
+
+                <div class="filter-group">
+                    <label>JWT Admin Token</label>
+                    <input type="password" id="adminToken" placeholder="토큰 입력">
+                </div>
+
+                <div class="filter-group">
+                    <label>시작 날짜</label>
+                    <input type="date" id="startDate">
+                </div>
+
+                <div class="filter-group">
+                    <label>종료 날짜</label>
+                    <input type="date" id="endDate">
+                </div>
+
+                <div class="filter-group">
+                    <label>상태 코드</label>
+                    <select id="statusCode">
+                        <option value="">모든 상태</option>
+                        <option value="200">성공 (200)</option>
+                        <option value="400">요청 오류 (400)</option>
+                        <option value="401">인증 실패 (401)</option>
+                        <option value="500">서버 오류 (500)</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>최소 응답시간 (ms)</label>
+                    <input type="number" id="minResponseTime" placeholder="0" min="0">
+                </div>
+
+                <div class="filter-group">
+                    <label>최대 응답시간 (ms)</label>
+                    <input type="number" id="maxResponseTime" placeholder="10000" min="0">
+                </div>
+
+                <div class="filter-group">
+                    <label>사용자 ID (선택)</label>
+                    <input type="text" id="userId" placeholder="UUID 입력">
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="fetchImageLogs()">
+                        🔍 로그 조회
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetFilters()">
+                        🔄 초기화
+                    </button>
+                </div>
+
+                <div id="filterInfo" class="filter-info" style="display:none;"></div>
+            </div>
+
+            <!-- 우측: 콘텐츠 영역 -->
+            <div class="content-area">
+                <!-- 탭 -->
+                <div class="tabs">
+                    <button class="tab-button active" onclick="switchTab(event, 'stats')">
+                        📈 통계
+                    </button>
+                    <button class="tab-button" onclick="switchTab(event, 'logs')">
+                        📋 로그 테이블
+                    </button>
+                    <button class="tab-button" onclick="switchTab(event, 'performance')">
+                        🚀 성능 분석
+                    </button>
+                    <button class="tab-button" onclick="switchTab(event, 'errors')">
+                        ⚠️ 에러 분석
+                    </button>
+                    <button class="tab-button" onclick="switchTab(event, 'export')">
+                        💾 내보내기
+                    </button>
+                </div>
+
+                <!-- 통계 탭 -->
+                <div id="stats" class="tab-content active">
+                    <div id="statsContent">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 로그 테이블 탭 -->
+                <div id="logs" class="tab-content">
+                    <div id="logsContent">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 성능 분석 탭 -->
+                <div id="performance" class="tab-content">
+                    <div id="performanceContent">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 에러 분석 탭 -->
+                <div id="errors" class="tab-content">
+                    <div id="errorsContent">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 내보내기 탭 -->
+                <div id="export" class="tab-content">
+                    <div id="exportContent">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let allLogs = [];
+        let filteredLogs = [];
+        let responseTimeChart = null;
+        let errorChart = null;
+        let timelineChart = null;
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            setDefaultDates();
+            // 초기 로드 시 비활성화
+            document.getElementById('statsContent').innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <p style="color: #999; font-size: 16px;">
+                        📌 왼쪽 패널에서 설정 후 "로그 조회" 버튼을 클릭하세요
+                    </p>
+                </div>
+            `;
+            document.getElementById('logsContent').innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <p style="color: #999; font-size: 16px;">
+                        📌 왼쪽 패널에서 설정 후 "로그 조회" 버튼을 클릭하세요
+                    </p>
+                </div>
+            `;
+            document.getElementById('performanceContent').innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <p style="color: #999; font-size: 16px;">
+                        📌 왼쪽 패널에서 설정 후 "로그 조회" 버튼을 클릭하세요
+                    </p>
+                </div>
+            `;
+            document.getElementById('errorsContent').innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <p style="color: #999; font-size: 16px;">
+                        📌 왼쪽 패널에서 설정 후 "로그 조회" 버튼을 클릭하세요
+                    </p>
+                </div>
+            `;
+            document.getElementById('exportContent').innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <p style="color: #999; font-size: 16px;">
+                        📌 왼쪽 패널에서 설정 후 "로그 조회" 버튼을 클릭하세요
+                    </p>
+                </div>
+            `;
+        });
+
+        // 기본 날짜 설정 (최근 7일)
+        function setDefaultDates() {
+            const endDate = new Date();
+            const startDate = new Date(endDate);
+            startDate.setDate(startDate.getDate() - 7);
+
+            document.getElementById('startDate').valueAsDate = startDate;
+            document.getElementById('endDate').valueAsDate = endDate;
+        }
+
+        // 필터 초기화
+        function resetFilters() {
+            document.getElementById('adminToken').value = '';
+            document.getElementById('userId').value = '';
+            document.getElementById('statusCode').value = '';
+            document.getElementById('minResponseTime').value = '0';
+            document.getElementById('maxResponseTime').value = '10000';
+            setDefaultDates();
+            document.getElementById('filterInfo').style.display = 'none';
+        }
+
+        // 탭 전환
+        function switchTab(event, tabName) {
+            // 모든 탭 비활성화
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // 선택된 탭 활성화
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 로그 조회
+        async function fetchImageLogs() {
+            const token = document.getElementById('adminToken').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const statusCode = document.getElementById('statusCode').value;
+            const minResponseTime = parseInt(document.getElementById('minResponseTime').value) || 0;
+            const maxResponseTime = parseInt(document.getElementById('maxResponseTime').value) || 10000;
+            const userId = document.getElementById('userId').value;
+
+            if (!token) {
+                alert('JWT Admin Token을 입력하세요');
+                return;
+            }
+
+            if (!startDate || !endDate) {
+                alert('날짜를 선택하세요');
+                return;
+            }
+
+            // 로딩 상태 표시
+            showLoading();
+
+            try {
+                // API 호출 (서버 구현 필요)
+                const response = await fetch('/api/admin/logs/image-validation', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        startDate,
+                        endDate,
+                        statusCode: statusCode || null,
+                        minResponseTime,
+                        maxResponseTime,
+                        userId: userId || null,
+                        endpoint: '/api/process-image-validate'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                allLogs = data.logs || [];
+                filteredLogs = allLogs;
+
+                // 필터 정보 표시
+                showFilterInfo(allLogs.length, startDate, endDate);
+
+                // 데이터 표시
+                renderStats();
+                renderLogs();
+                renderPerformance();
+                renderErrors();
+                renderExport();
+
+            } catch (error) {
+                console.error('오류:', error);
+                showError(`로그 조회 실패: ${error.message}`);
+            }
+        }
+
+        // 필터 정보 표시
+        function showFilterInfo(count, startDate, endDate) {
+            const filterInfo = document.getElementById('filterInfo');
+            filterInfo.innerHTML = `
+                ✅ ${count}개의 로그를 조회했습니다 (${startDate} ~ ${endDate})
+            `;
+            filterInfo.style.display = 'block';
+        }
+
+        // 로딩 표시
+        function showLoading() {
+            const loading = `<div class="loading"><div class="spinner"></div></div>`;
+            document.getElementById('statsContent').innerHTML = loading;
+            document.getElementById('logsContent').innerHTML = loading;
+            document.getElementById('performanceContent').innerHTML = loading;
+            document.getElementById('errorsContent').innerHTML = loading;
+            document.getElementById('exportContent').innerHTML = loading;
+        }
+
+        // 에러 표시
+        function showError(message) {
+            const errorHtml = `<div class="error-message">❌ ${message}</div>`;
+            document.getElementById('statsContent').innerHTML = errorHtml;
+            document.getElementById('logsContent').innerHTML = errorHtml;
+            document.getElementById('performanceContent').innerHTML = errorHtml;
+            document.getElementById('errorsContent').innerHTML = errorHtml;
+            document.getElementById('exportContent').innerHTML = errorHtml;
+        }
+
+        // 통계 렌더링
+        function renderStats() {
+            if (filteredLogs.length === 0) {
+                document.getElementById('statsContent').innerHTML = '<div class="error-message">조회된 로그가 없습니다</div>';
+                return;
+            }
+
+            const stats = calculateStats(filteredLogs);
+
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">📊 총 요청 수</div>
+                        <div class="stat-value">${stats.totalRequests}</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-label">✅ 성공 요청</div>
+                        <div class="stat-value">${stats.successCount}</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-label">❌ 실패 요청</div>
+                        <div class="stat-value">${stats.failureCount}</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-label">📈 성공률</div>
+                        <div class="stat-value">${stats.successRate.toFixed(1)}%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">⏱️ 평균 응답시간</div>
+                        <div class="stat-value">${stats.avgResponseTime.toFixed(0)}ms</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">🐢 최대 응답시간</div>
+                        <div class="stat-value">${stats.maxResponseTime}ms</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">⚡ 최소 응답시간</div>
+                        <div class="stat-value">${stats.minResponseTime}ms</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-label">🐌 느린 요청 (>5s)</div>
+                        <div class="stat-value">${stats.slowRequests}</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px; margin-bottom: 15px; color: #333;">응답 시간 분포</h3>
+                <div class="response-time-distribution">
+                    <div class="distribution-item">
+                        <div class="distribution-bar" style="height: ${Math.min(stats.distribution.fast / stats.totalRequests * 150, 150)}px;">
+                            ${stats.distribution.fast > 0 ? `<div class="distribution-value">${stats.distribution.fast}</div>` : ''}
+                        </div>
+                        <div class="distribution-label">빠름 (&lt;2s)</div>
+                        <div style="font-weight: bold; color: #667eea;">${(stats.distribution.fast / stats.totalRequests * 100).toFixed(1)}%</div>
+                    </div>
+                    <div class="distribution-item">
+                        <div class="distribution-bar" style="height: ${Math.min(stats.distribution.normal / stats.totalRequests * 150, 150)}px;">
+                            ${stats.distribution.normal > 0 ? `<div class="distribution-value">${stats.distribution.normal}</div>` : ''}
+                        </div>
+                        <div class="distribution-label">정상 (2-5s)</div>
+                        <div style="font-weight: bold; color: #667eea;">${(stats.distribution.normal / stats.totalRequests * 100).toFixed(1)}%</div>
+                    </div>
+                    <div class="distribution-item">
+                        <div class="distribution-bar slow" style="height: ${Math.min(stats.distribution.slow / stats.totalRequests * 150, 150)}px;">
+                            ${stats.distribution.slow > 0 ? `<div class="distribution-value">${stats.distribution.slow}</div>` : ''}
+                        </div>
+                        <div class="distribution-label">느림 (5-10s)</div>
+                        <div style="font-weight: bold; color: #f5576c;">${(stats.distribution.slow / stats.totalRequests * 100).toFixed(1)}%</div>
+                    </div>
+                    <div class="distribution-item">
+                        <div class="distribution-bar slow" style="height: ${Math.min(stats.distribution.verySlow / stats.totalRequests * 150, 150)}px;">
+                            ${stats.distribution.verySlow > 0 ? `<div class="distribution-value">${stats.distribution.verySlow}</div>` : ''}
+                        </div>
+                        <div class="distribution-label">매우느림 (&gt;10s)</div>
+                        <div style="font-weight: bold; color: #f5576c;">${(stats.distribution.verySlow / stats.totalRequests * 100).toFixed(1)}%</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px; margin-bottom: 15px; color: #333;">백분위수 분석</h3>
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;">P50 (중위수)</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; color: #667eea;">${stats.p50}ms</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;">P95</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; color: #667eea;">${stats.p95}ms</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;">P99</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; color: #f5576c;">${stats.p99}ms</td>
+                    </tr>
+                </table>
+            `;
+
+            document.getElementById('statsContent').innerHTML = html;
+        }
+
+        // 로그 테이블 렌더링
+        function renderLogs() {
+            if (filteredLogs.length === 0) {
+                document.getElementById('logsContent').innerHTML = '<div class="error-message">조회된 로그가 없습니다</div>';
+                return;
+            }
+
+            let html = `
+                <div class="export-buttons">
+                    <button onclick="exportToCSV()">📥 CSV 다운로드</button>
+                    <button onclick="exportToJSON()">📥 JSON 다운로드</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>시간</th>
+                                <th>응답시간 (ms)</th>
+                                <th>상태</th>
+                                <th>IP 주소</th>
+                                <th>사용자 ID</th>
+                                <th>에러 메시지</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            filteredLogs.slice(0, 100).forEach(log => {
+                const statusBadge = log.status_code === 200 
+                    ? `<span class="status-badge status-success">✅ 성공</span>`
+                    : `<span class="status-badge status-error">❌ 실패</span>`;
+
+                const responseTimeBadge = log.response_time_ms > 5000
+                    ? `<span class="status-badge status-slow" style="color: #856404;">${log.response_time_ms}ms 🐌</span>`
+                    : `<span>${log.response_time_ms}ms</span>`;
+
+                html += `
+                    <tr>
+                        <td>${new Date(log.created_at).toLocaleString('ko-KR')}</td>
+                        <td>${responseTimeBadge}</td>
+                        <td>${statusBadge}</td>
+                        <td>${log.ip_address || '-'}</td>
+                        <td><code style="background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-size: 11px;">${log.user_id ? log.user_id.substring(0, 8) : '-'}</code></td>
+                        <td title="${log.error_message || ''}">${log.error_message ? log.error_message.substring(0, 50) + '...' : '-'}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+                <div style="text-align: center; color: #666; margin-top: 10px; font-size: 12px;">
+                    상위 100개 로그 표시 (전체: ${filteredLogs.length}개)
+                </div>
+            `;
+
+            document.getElementById('logsContent').innerHTML = html;
+        }
+
+        // 성능 분석 렌더링
+        function renderPerformance() {
+            if (filteredLogs.length === 0) {
+                document.getElementById('performanceContent').innerHTML = '<div class="error-message">조회된 로그가 없습니다</div>';
+                return;
+            }
+
+            const stats = calculateStats(filteredLogs);
+            const slowRequests = filteredLogs
+                .filter(log => log.response_time_ms > 5000)
+                .sort((a, b) => b.response_time_ms - a.response_time_ms)
+                .slice(0, 10);
+
+            let html = `
+                <h3 style="margin-bottom: 15px; color: #333;">느린 요청 Top 10 (응답시간 > 5초)</h3>
+                <div class="slow-requests-list">
+            `;
+
+            if (slowRequests.length === 0) {
+                html += '<div style="text-align: center; color: #999; padding: 20px;">느린 요청이 없습니다 🎉</div>';
+            } else {
+                slowRequests.forEach((log, index) => {
+                    html += `
+                        <div class="slow-request-item">
+                            <div class="slow-request-header">
+                                <span>#${index + 1}</span>
+                                <span class="slow-request-time">${log.response_time_ms}ms 🐌</span>
+                            </div>
+                            <div class="slow-request-details">
+                                <div>📅 시간: ${new Date(log.created_at).toLocaleString('ko-KR')}</div>
+                                <div>👤 사용자: ${log.user_id ? log.user_id.substring(0, 12) : '-'}</div>
+                                <div>🌐 IP: ${log.ip_address || '-'}</div>
+                                ${log.error_message ? `<div>⚠️ 에러: ${log.error_message}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            html += `
+                </div>
+
+                <h3 style="margin: 20px 0 15px; color: #333;">시간대별 응답시간 추이</h3>
+                <div class="chart-container">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+
+                <h3 style="margin: 20px 0 15px; color: #333;">상태 코드별 응답시간</h3>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            `;
+
+            document.getElementById('performanceContent').innerHTML = html;
+
+            // 차트 렌더링 (다음 프레임에서)
+            setTimeout(() => {
+                renderTimelineChart(filteredLogs);
+                renderStatusChart(filteredLogs);
+            }, 100);
+        }
+
+        // 에러 분석 렌더링
+        function renderErrors() {
+            if (filteredLogs.length === 0) {
+                document.getElementById('errorsContent').innerHTML = '<div class="error-message">조회된 로그가 없습니다</div>';
+                return;
+            }
+
+            const errorLogs = filteredLogs.filter(log => log.error_message);
+            const errorStats = {};
+
+            errorLogs.forEach(log => {
+                const msg = log.error_message.substring(0, 100);
+                errorStats[msg] = (errorStats[msg] || 0) + 1;
+            });
+
+            const sortedErrors = Object.entries(errorStats)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            let html = `
+                <h3 style="margin-bottom: 15px; color: #333;">에러 분석 (상위 10개)</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div class="stat-card warning">
+                        <div class="stat-label">❌ 총 에러 수</div>
+                        <div class="stat-value">${errorLogs.length}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">📊 에러율</div>
+                        <div class="stat-value">${(errorLogs.length / filteredLogs.length * 100).toFixed(1)}%</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="errorChart"></canvas>
+                </div>
+
+                <h3 style="margin: 20px 0 15px; color: #333;">에러 메시지별 발생 빈도</h3>
+                <div class="top-errors">
+            `;
+
+            sortedErrors.forEach((item, index) => {
+                html += `
+                    <div class="error-item">
+                        <div class="error-message-text">#${index + 1}: ${item[0]}</div>
+                        <div class="error-count">발생 횟수: ${item[1]}회</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                </div>
+            `;
+
+            document.getElementById('errorsContent').innerHTML = html;
+
+            // 차트 렌더링
+            setTimeout(() => {
+                renderErrorChart(sortedErrors);
+            }, 100);
+        }
+
+        // 내보내기 렌더링
+        function renderExport() {
+            let html = `
+                <h3 style="margin-bottom: 15px; color: #333;">📥 데이터 내보내기</h3>
+                
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+                    <p style="color: #333; margin-bottom: 15px;">조회한 로그 데이터를 다양한 형식으로 내보낼 수 있습니다.</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                        <button class="btn btn-primary" onclick="exportToCSV()" style="width: 100%; padding: 15px;">
+                            📊 CSV 다운로드<br><span style="font-size: 11px;">(Excel 호환)</span>
+                        </button>
+                        <button class="btn btn-primary" onclick="exportToJSON()" style="width: 100%; padding: 15px;">
+                            📄 JSON 다운로드<br><span style="font-size: 11px;">(프로그래밍용)</span>
+                        </button>
+                        <button class="btn btn-primary" onclick="copyToClipboard()" style="width: 100%; padding: 15px;">
+                            📋 클립보드 복사<br><span style="font-size: 11px;">(JSON)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom: 15px; color: #333;">통계 요약</h3>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 12px; line-height: 1.6;">
+                    <div>조회된 로그: ${filteredLogs.length}개</div>
+                    <div>조회 시간: ${new Date().toLocaleString('ko-KR')}</div>
+                    <div>성공 요청: ${filteredLogs.filter(l => l.status_code === 200).length}개</div>
+                    <div>실패 요청: ${filteredLogs.filter(l => l.status_code !== 200).length}개</div>
+                    <div>평균 응답시간: ${calculateStats(filteredLogs).avgResponseTime.toFixed(0)}ms</div>
+                </div>
+            `;
+
+            document.getElementById('exportContent').innerHTML = html;
+        }
+
+        // 통계 계산
+        function calculateStats(logs) {
+            const totalRequests = logs.length;
+            const successCount = logs.filter(log => log.status_code === 200).length;
+            const failureCount = totalRequests - successCount;
+            const successRate = totalRequests > 0 ? (successCount / totalRequests) * 100 : 0;
+
+            const responseTimes = logs.map(log => log.response_time_ms).sort((a, b) => a - b);
+            const avgResponseTime = responseTimes.length > 0 
+                ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length 
+                : 0;
+            const maxResponseTime = Math.max(...responseTimes);
+            const minResponseTime = Math.min(...responseTimes);
+
+            const slowRequests = logs.filter(log => log.response_time_ms > 5000).length;
+
+            // 응답시간 분포
+            const distribution = {
+                fast: logs.filter(log => log.response_time_ms < 2000).length,
+                normal: logs.filter(log => log.response_time_ms >= 2000 && log.response_time_ms < 5000).length,
+                slow: logs.filter(log => log.response_time_ms >= 5000 && log.response_time_ms < 10000).length,
+                verySlow: logs.filter(log => log.response_time_ms >= 10000).length
+            };
+
+            // 백분위수
+            const p50 = responseTimes[Math.floor(responseTimes.length * 0.5)];
+            const p95 = responseTimes[Math.floor(responseTimes.length * 0.95)];
+            const p99 = responseTimes[Math.floor(responseTimes.length * 0.99)];
+
+            return {
+                totalRequests,
+                successCount,
+                failureCount,
+                successRate,
+                avgResponseTime,
+                maxResponseTime: isFinite(maxResponseTime) ? maxResponseTime : 0,
+                minResponseTime: isFinite(minResponseTime) ? minResponseTime : 0,
+                slowRequests,
+                distribution,
+                p50: p50 || 0,
+                p95: p95 || 0,
+                p99: p99 || 0
+            };
+        }
+
+        // 시간대별 응답시간 차트
+        function renderTimelineChart(logs) {
+            const hourly = {};
+            logs.forEach(log => {
+                const date = new Date(log.created_at);
+                const hour = `${date.getHours().toString().padStart(2, '0')}:00`;
+                if (!hourly[hour]) {
+                    hourly[hour] = [];
+                }
+                hourly[hour].push(log.response_time_ms);
+            });
+
+            const labels = Object.keys(hourly).sort();
+            const avgData = labels.map(hour => {
+                const times = hourly[hour];
+                return (times.reduce((a, b) => a + b, 0) / times.length).toFixed(0);
+            });
+
+            const ctx = document.getElementById('timelineChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: '시간대별 평균 응답시간 (ms)',
+                            data: avgData,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+        }
+
+        // 상태코드별 응답시간 차트
+        function renderStatusChart(logs) {
+            const statusData = {};
+            logs.forEach(log => {
+                if (!statusData[log.status_code]) {
+                    statusData[log.status_code] = [];
+                }
+                statusData[log.status_code].push(log.response_time_ms);
+            });
+
+            const labels = Object.keys(statusData).sort();
+            const avgData = labels.map(status => {
+                const times = statusData[status];
+                return (times.reduce((a, b) => a + b, 0) / times.length).toFixed(0);
+            });
+
+            const ctx = document.getElementById('statusChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels.map(s => `상태 ${s}`),
+                        datasets: [{
+                            label: '평균 응답시간 (ms)',
+                            data: avgData,
+                            backgroundColor: [
+                                '#4facfe',
+                                '#f5576c',
+                                '#f5576c'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+        }
+
+        // 에러 차트
+        function renderErrorChart(errors) {
+            const labels = errors.map(e => e[0].substring(0, 30));
+            const data = errors.map(e => e[1]);
+
+            const ctx = document.getElementById('errorChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: '발생 횟수',
+                            data,
+                            backgroundColor: '#f5576c'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: { display: true }
+                        },
+                        scales: {
+                            x: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+        }
+
+        // CSV 내보내기
+        function exportToCSV() {
+            if (filteredLogs.length === 0) {
+                alert('내보낼 데이터가 없습니다');
+                return;
+            }
+
+            let csv = '시간,응답시간(ms),상태코드,IP,사용자ID,에러메시지\n';
+            filteredLogs.forEach(log => {
+                csv += `"${new Date(log.created_at).toLocaleString('ko-KR')}",${log.response_time_ms},${log.status_code},"${log.ip_address}","${log.user_id || ''}","${(log.error_message || '').replace(/"/g, '""')}"\n`;
+            });
+
+            downloadFile(csv, 'image-logs.csv', 'text/csv');
+        }
+
+        // JSON 내보내기
+        function exportToJSON() {
+            if (filteredLogs.length === 0) {
+                alert('내보낼 데이터가 없습니다');
+                return;
+            }
+
+            const json = JSON.stringify({
+                exportDate: new Date().toISOString(),
+                totalLogs: filteredLogs.length,
+                stats: calculateStats(filteredLogs),
+                logs: filteredLogs
+            }, null, 2);
+
+            downloadFile(json, 'image-logs.json', 'application/json');
+        }
+
+        // 클립보드에 복사
+        function copyToClipboard() {
+            if (filteredLogs.length === 0) {
+                alert('복사할 데이터가 없습니다');
+                return;
+            }
+
+            const json = JSON.stringify(filteredLogs, null, 2);
+            navigator.clipboard.writeText(json).then(() => {
+                alert('✅ 클립보드에 복사되었습니다');
+            });
+        }
+
+        // 파일 다운로드
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>

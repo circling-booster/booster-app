@@ -1,13 +1,15 @@
 /**
- * services/processImageValidateService.js - 수정 버전
- * 역할: API Key/Secret 및 이미지 검증 비즈니스 로직
- * 특징: 기존 ApiLogs 테이블 사용 (이미지 관련 필드 저장 안 함)
+ * services/processImageValidateService.js - OpenAI 통합 버전
+ * 역할: API Key/Secret 및 이미지 검증, OpenAI 이미지 분석
+ * 특징: GPT-4o-mini를 사용한 이미지 내용 분석
  */
 
 const { executeQuery, executeNonQuery } = require('../config/database');
 const { encryptApiSecret } = require('../utils/cryptoUtils');
-const { SUBSCRIPTION_STATUS, API_CALL_LIMITS } = require('../config/constants');
+const { SUBSCRIPTION_STATUS } = require('../config/constants');
 const crypto = require('crypto');
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY_Captcha;
 
 /**
  * API Key와 Secret 검증
@@ -15,23 +17,7 @@ const crypto = require('crypto');
  * @param {string} apiKey - 요청된 API Key
  * @param {string} apiSecret - 요청된 API Secret
  * 
- * @returns {Promise}
- * 성공: {
- *   success: true,
- *   api_key_id,
- *   user_id,
- *   created_at,
- *   expires_at,
- *   is_active
- * }
- * 실패: {
- *   success: false,
- *   error: string,
- *   statusCode: number,
- *   errorCode: string
- * }
- * 
- * @throws {Error} DB 연결 오류 등
+ * @returns {Promise} 검증 결과
  */
 async function validateApiKey(apiKey, apiSecret) {
   try {
@@ -199,33 +185,116 @@ async function updateApiKeyLastUsed(apiKeyId) {
     );
   } catch (err) {
     console.error('[UPDATE_LAST_USED_ERROR]', err);
-    // 에러 무시 - 검증 결과에 영향 없음
+  }
+}
+
+/**
+ * OpenAI API를 사용한 이미지 분석
+ * 
+ * @param {string} base64Image - Base64 인코딩된 이미지
+ * @param {string} targetPrompt - 이미지 분석 프롬프트 (옵션)
+ * @returns {Promise} OpenAI 응답 텍스트
+ * 
+ * @throws {Error} OpenAI API 호출 실패
+ * 
+ * @note
+ * - GPT-4o-mini 모델 사용
+ * - Base64 이미지를 data URL로 변환
+ * - 이미지 분석 후 텍스트 응답 반환
+ */
+async function analyzeImageWithOpenAI(base64Image, targetPrompt = null) {
+  try {
+    // 1. OpenAI API Key 확인
+    if (!OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY 환경 변수가 설정되지 않았습니다');
+    }
+
+    // 2. Base64 이미지를 data URL로 변환
+    // data URL 형식: data:image/jpeg;base64,{base64_string}
+    const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+
+    // 3. 기본 프롬프트 설정 (사용자가 제공하지 않은 경우)
+    const userPrompt = targetPrompt || 'Read the 6 uppercase letters in this image. Output ONLY the 6 letters with no spaces, no explanations, no other text.';
+
+    // 4. OpenAI API payload 구성
+    const requestPayload = {
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: '당신은 유용한 AI 이미지 분석 어시스턴트입니다. 사용자가 요청한 내용에 따라 이미지를 분석하고 명확하고 정확한 답변을 제공합니다.'
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: userPrompt
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: imageUrl,
+                detail: 'auto'
+              }
+            }
+          ]
+        }
+      ],
+      temperature: 1,
+      top_p: 1,
+      max_tokens: 2048
+    };
+
+    // 5. OpenAI Chat Completions API 호출
+    console.log('[OPENAI_REQUEST]', { model: requestPayload.model, prompt: userPrompt });
+
+    const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestPayload),
+      timeout: 30000 // 30초 타임아웃
+    });
+
+    // 6. OpenAI 응답 상태 확인
+    if (!openaiRes.ok) {
+      const errText = await openaiRes.text().catch(() => '');
+      console.error('[OPENAI_API_ERROR]', { status: openaiRes.status, error: errText });
+      
+      throw new Error(
+        `OpenAI API 호출 실패 (${openaiRes.status}): ${errText || 'Unknown error'}`
+      );
+    }
+
+    // 7. OpenAI 응답 파싱
+    const openaiData = await openaiRes.json();
+
+    // 8. 응답에서 텍스트 추출
+    const answer = openaiData.choices?.[0]?.message?.content ?? 
+                   '(OpenAI API에서 응답 내용을 받지 못했습니다.)';
+
+    console.log('[OPENAI_RESPONSE]', { textLength: answer.length });
+
+    return answer;
+
+  } catch (err) {
+    console.error('[ANALYZE_IMAGE_WITH_OPENAI_ERROR]', {
+      error: err.message,
+      stack: err.stack
+    });
+    throw err;
   }
 }
 
 /**
  * 이미지 검증 시도 로깅
  * 
- * ⚠️ 변경사항: 기존 ApiLogs 테이블 사용 (이미지 필드 제외)
- * 
  * @param {Object} logData - 로그 데이터
- * - api_key_id: string (성공 시에만)
- * - user_id: string (성공 시에만)
- * - endpoint: string ("/api/process-image-validate")
- * - method: string ("POST")
- * - status_code: number
- * - response_time_ms: number
- * - ip_address: string
- * - request_body: string (JSON)
- * - error_message: string (실패 시에만)
- * 
  * @returns {Promise}
  * @throws {Error} DB 연결 오류 등
- * 
- * @note
- * - 기존 validateApiKeyService의 logValidationAttempt와 동일한 방식
- * - image_length는 저장하지 않음
- * - ApiLogs 테이블에 저장
  */
 async function logImageValidationAttempt(logData) {
   try {
@@ -251,7 +320,7 @@ async function logImageValidationAttempt(logData) {
     );
   } catch (err) {
     console.error('[LOGGING_ERROR]', err);
-    throw err; // 로깅 실패도 에러로 처리
+    throw err;
   }
 }
 
@@ -260,6 +329,7 @@ async function logImageValidationAttempt(logData) {
  */
 module.exports = {
   validateApiKey,
+  analyzeImageWithOpenAI,
   logImageValidationAttempt,
   updateApiKeyLastUsed
 };
