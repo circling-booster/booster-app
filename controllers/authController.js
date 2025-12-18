@@ -105,6 +105,7 @@ async function login(req, res) {
 
         // Step 2: 로그인 처리
         const result = await authService.loginUser(email, password);
+        
 
         console.log('[LOGIN API RESPONSE]', {
             userId: result.userId,

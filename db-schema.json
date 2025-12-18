@@ -1,6 +1,6 @@
 {
   "database": "booster_db",
-  "exportedAt": "2025-12-18T04:24:26.830Z",
+  "exportedAt": "2025-12-18T06:11:45.955Z",
   "tables": [
     {
       "name": "ApiKeys",
@@ -309,10 +309,10 @@
       "columns": [
         {
           "name": "id",
-          "dataType": "nvarchar",
-          "maxLength": 36,
-          "precision": null,
-          "scale": null,
+          "dataType": "int",
+          "maxLength": null,
+          "precision": 10,
+          "scale": 0,
           "isNullable": false,
           "defaultValue": null,
           "position": 1
@@ -358,6 +358,16 @@
           "position": 5
         },
         {
+          "name": "is_active",
+          "dataType": "bit",
+          "maxLength": null,
+          "precision": null,
+          "scale": null,
+          "isNullable": false,
+          "defaultValue": "((1))",
+          "position": 6
+        },
+        {
           "name": "created_at",
           "dataType": "datetime2",
           "maxLength": null,
@@ -365,7 +375,7 @@
           "scale": null,
           "isNullable": false,
           "defaultValue": "(getdate())",
-          "position": 6
+          "position": 7
         }
       ],
       "primaryKey": null
@@ -1324,15 +1334,7 @@
     },
     {
       "tableName": "SubscriptionTiers",
-      "name": "IX_SubscriptionTiers_TierName",
-      "type": "NONCLUSTERED",
-      "columns": [
-        "tier_name"
-      ]
-    },
-    {
-      "tableName": "SubscriptionTiers",
-      "name": "PK__Subscrip__3213E83F82FFBD30",
+      "name": "PK__Subscrip__3213E83F2D82E4A7",
       "type": "CLUSTERED",
       "columns": [
         "id"
@@ -1340,7 +1342,7 @@
     },
     {
       "tableName": "SubscriptionTiers",
-      "name": "UQ__Subscrip__10845677992E77D2",
+      "name": "UQ__Subscrip__10845677917C5F06",
       "type": "NONCLUSTERED",
       "columns": [
         "tier_name"
@@ -1554,15 +1556,6 @@
       "onUpdate": "NO ACTION"
     },
     {
-      "name": "FK_UserSubscriptions_SubscriptionTiers",
-      "tableName": "UserSubscriptions",
-      "columnName": "tier_id",
-      "referencedTable": "SubscriptionTiers",
-      "referencedColumn": "id",
-      "onDelete": "NO ACTION",
-      "onUpdate": "NO ACTION"
-    },
-    {
       "name": "FK_UserSubscriptions_Users",
       "tableName": "UserSubscriptions",
       "columnName": "user_id",
@@ -1617,19 +1610,14 @@
       "type": "CHECK"
     },
     {
-      "name": "UQ__Subscrip__10845677992E77D2",
+      "name": "PK__Subscrip__3213E83F2D82E4A7",
+      "tableName": "SubscriptionTiers",
+      "type": "PRIMARY KEY"
+    },
+    {
+      "name": "UQ__Subscrip__10845677917C5F06",
       "tableName": "SubscriptionTiers",
       "type": "UNIQUE"
-    },
-    {
-      "name": "PK__Subscrip__3213E83F82FFBD30",
-      "tableName": "SubscriptionTiers",
-      "type": "PRIMARY KEY"
-    },
-    {
-      "name": "PK__Users__3213E83F83174B84",
-      "tableName": "Users",
-      "type": "PRIMARY KEY"
     },
     {
       "name": "UQ__Users__AB6E61646DAD8717",
@@ -1637,14 +1625,19 @@
       "type": "UNIQUE"
     },
     {
-      "name": "CK_UserSubscriptions_Status",
-      "tableName": "UserSubscriptions",
-      "type": "CHECK"
+      "name": "PK__Users__3213E83F83174B84",
+      "tableName": "Users",
+      "type": "PRIMARY KEY"
     },
     {
       "name": "PK__UserSubs__3213E83FA1520E78",
       "tableName": "UserSubscriptions",
       "type": "PRIMARY KEY"
+    },
+    {
+      "name": "CK_UserSubscriptions_Status",
+      "tableName": "UserSubscriptions",
+      "type": "CHECK"
     },
     {
       "name": "PK__WebhookL__3213E83FE96354F0",
