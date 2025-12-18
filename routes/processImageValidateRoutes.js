@@ -1,8 +1,8 @@
 /**
- * routes/processImageValidateRoutes.js
- * 역할: 이미지 처리 및 API Key 검증 엔드포인트 라우트 정의
- * 특징: 공개 엔드포인트 (인증 미필요, CORS 허용), 이미지 검증 미들웨어 포함
- */
+* routes/processImageValidateRoutes.js (DB 수정 없음)
+* 역할: 이미지 처리 및 API Key 검증 엔드포인트 라우트 정의
+* 특징: 타이밍 정보 조회 엔드포인트 추가
+*/
 
 const express = require('express');
 const router = express.Router();
@@ -10,102 +10,46 @@ const processImageValidateController = require('../controllers/processImageValid
 const { validateImageMiddleware } = require('../middleware/imageValidationMiddleware');
 
 /**
- * POST /api/process-image-validate
- * 
- * 설명: API Key와 Secret을 검증한 후 base64 이미지의 길이를 반환하는 공개 엔드포인트
- * 
- * @public (인증 불필요)
- * @middleware imageValidationMiddleware (이미지 형식 및 크기 검증)
- * @param {string} api_key - API Key (sk_... 형식)
- * @param {string} api_secret - API Secret (64자 16진수)
- * @param {string} image - Base64 인코딩된 이미지
- *   - 형식: "data:image/png;base64,..." 또는 순수 base64 문자열
- *   - 최대 크기: 5MB (이진 데이터 기준)
- *   - 지원 형식: PNG, JPEG, JPG, GIF, WebP
- * 
- * @returns {200} 검증 성공
- * {
- *   success: true,
- *   data: {
- *     user_id: "550e8400-e29b-41d4-a716-446655440000",
- *     api_key_id: "660e8400-e29b-41d4-a716-446655440001",
- *     creation_date: "2025-12-17T05:00:00.000Z",
- *     expiration_date: "2025-12-24T05:00:00.000Z",
- *     is_active: true,
- *     image_length: 1024567
- *   },
- *   message: "이미지 검증 성공",
- *   timestamp: "2025-12-18T05:26:00.000Z"
- * }
- * 
- * @returns {400} Bad Request - API Key, Secret 또는 Image 누락/형식 오류
- * {
- *   success: false,
- *   message: "이미지 데이터가 누락되었습니다",
- *   errorCode: "MISSING_IMAGE",
- *   timestamp: "2025-12-18T05:26:00.000Z"
- * }
- * 
- * @returns {400} Bad Request - 이미지 형식 오류
- * {
- *   success: false,
- *   message: "유효한 base64 이미지가 아닙니다",
- *   errorCode: "INVALID_IMAGE_FORMAT",
- *   timestamp: "2025-12-18T05:26:00.000Z"
- * }
- * 
- * @returns {401} Unauthorized - 잘못된 Key/Secret
- * {
- *   success: false,
- *   message: "유효하지 않은 API Key입니다",
- *   errorCode: "INVALID_API_KEY",
- *   timestamp: "2025-12-18T05:26:00.000Z"
- * }
- * 
- * @returns {403} Forbidden - 비활성화된 API Key 또는 사용자
- * {
- *   success: false,
- *   message: "비활성화된 API Key입니다",
- *   errorCode: "API_KEY_INACTIVE",
- *   timestamp: "2025-12-18T05:26:00.000Z"
- * }
- * 
- * @returns {429} Too Many Requests - 월간 API 호출 제한 초과
- * {
- *   success: false,
- *   message: "API 호출 제한을 초과했습니다",
- *   errorCode: "API_LIMIT_EXCEEDED",
- *   timestamp: "2025-12-18T05:26:00.000Z"
- * }
- * 
- * @returns {500} Internal Server Error - 서버 오류
- * {
- *   success: false,
- *   message: "서버 오류가 발생했습니다",
- *   errorCode: "INTERNAL_ERROR",
- *   timestamp: "2025-12-18T05:26:00.000Z"
- * }
- * 
- * @example
- * POST /api/process-image-validate
- * Content-Type: application/json
- * 
- * {
- *   "api_key": "sk_abc123def456ghi789...",
- *   "api_secret": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6...",
- *   "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
- * }
- * 
- * @flow
- * 1. 클라이언트에서 POST 요청
- * 2. imageValidationMiddleware에서 이미지 형식 및 크기 검증
- * 3. 검증 실패 시 400 에러 응답
- * 4. 검증 성공 시 req.base64Image에 순수 base64 저장
- * 5. processImageValidateController에서 API Key/Secret 검증
- * 6. 검증 실패 시 401/403/429 에러 응답
- * 7. 모든 검증 통과 시 이미지 길이와 함께 200 응답
- * 8. 모든 요청 로깅 (성공/실패)
- */
+* POST /api/process-image-validate
+*
+* 설명: API Key와 Secret을 검증한 후 이미지 분석 수행
+* 응답에는 OpenAI 응답 시간과 서버 처리 시간을 분리한 timing 객체 포함
+*
+* @public (인증 불필요)
+* @middleware imageValidationMiddleware (이미지 형식 및 크기 검증)
+* @param {string} api_key - API Key (sk_... 형식)
+* @param {string} api_secret - API Secret
+* @param {string} image - Base64 인코딩된 이미지
+* @param {string} [prompt] - 이미지 분석 프롬프트 (옵션)
+*
+* @returns {200} 검증 및 분석 성공
+* {
+*   success: true,
+*   data: {
+*     user_id: "550e8400-e29b-41d4-a716-446655440000",
+*     api_key_id: "660e8400-e29b-41d4-a716-446655440001",
+*     creation_date: "2025-12-17T05:00:00.000Z",
+*     expiration_date: "2025-12-24T05:00:00.000Z",
+*     is_active: true,
+*     image_length: 1024567,
+*     text: "ABCDEF",
+*     timing: {
+*       total_time_ms: 2450,
+*       openai_response_time_ms: 1800,
+*       server_processing_time_ms: 650
+*     }
+*   },
+*   message: "이미지 분석 성공",
+*   timestamp: "2025-12-18T05:26:00.000Z"
+* }
+*
+* @returns {400} Bad Request
+* @returns {401} Unauthorized
+* @returns {403} Forbidden
+* @returns {429} Too Many Requests
+* @returns {500} Internal Server Error
+*/
+
 router.post(
   '/process-image-validate',
   validateImageMiddleware,
@@ -113,58 +57,97 @@ router.post(
 );
 
 /**
- * GET /api/admin/image-validation-logs
- * 
- * 설명: 관리자가 모든 이미지 검증 요청 로그를 조회
- * 
- * @auth 필수 (JWT + adminAuthMiddleware)
- * @query {number} [page=1] - 페이지 번호
- * @query {number} [limit=20] - 페이지당 아이템 수
- * 
- * @returns {200} 이미지 검증 로그 목록
- * {
- *   success: true,
- *   data: [
- *     {
- *       id: "770e8400-e29b-41d4-a716-446655440002",
- *       api_key_id: "660e8400-e29b-41d4-a716-446655440001",
- *       user_id: "550e8400-e29b-41d4-a716-446655440000",
- *       endpoint: "/api/process-image-validate",
- *       method: "POST",
- *       status_code: 200,
- *       response_time_ms: 145,
- *       ip_address: "203.0.113.45",
- *       request_body: "{...}",
- *       error_message: null,
- *       image_length: 1024567,
- *       created_at: "2025-12-18T05:26:00.000Z"
- *     },
- *     ...
- *   ],
- *   message: "이미지 검증 로그 조회 성공",
- *   pagination: {
- *     total: 150,
- *     page: 1,
- *     limit: 20,
- *     totalPages: 8
- *   },
- *   timestamp: "2025-12-18T05:26:00.000Z"
- * }
- * 
- * @throws {401} Unauthorized - 토큰 없음 또는 유효하지 않음
- * @throws {403} Forbidden - 관리자 권한 필요
- * @throws {500} Internal Server Error - 서버 오류
- * 
- * @example
- * GET /api/admin/image-validation-logs?page=1&limit=20
- * Headers:
- *   Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- */
-// 주석: adminValidationLogsController 구현 필요 (선택사항)
-// router.get(
-//   '/admin/image-validation-logs',
-//   adminAuthMiddleware,
-//   adminImageValidationLogsController.getImageValidationLogs
-// );
+* ✅ 추가: GET /api/admin/timing-logs
+*
+* 설명: 메모리 버퍼에 저장된 최근 타이밍 정보 조회 (관리자용)
+* 
+* @query {number} [limit=20] - 조회할 로그 개수 (최대 1000개까지 메모리에 저장)
+*
+* @returns {200} 타이밍 로그 목록
+* {
+*   success: true,
+*   data: {
+*     total_logs: 20,
+*     logs: [
+*       {
+*         timestamp: "2025-12-18T09:15:32.123Z",
+*         log_id: "abc123...",
+*         endpoint: "/api/process-image-validate",
+*         method: "POST",
+*         total_time_ms: 2450,
+*         openai_response_time_ms: 1800,
+*         server_processing_time_ms: 650,
+*         openai_ratio: "73.47%",
+*         status_code: 200,
+*         user_id: "550e8400..."
+*       },
+*       ...
+*     ]
+*   },
+*   message: "타이밍 로그 조회 성공",
+*   timestamp: "2025-12-18T09:26:00.000Z"
+* }
+*
+* @example
+* GET /api/admin/timing-logs?limit=50
+*
+* @note
+* - 최근 1000개의 요청 정보만 메모리에 유지
+* - 서버 재시작 시 데이터 초기화
+* - 프로덕션 환경에서는 데이터베이스에 저장하거나 ELK 스택 사용 권장
+*/
+
+router.get(
+  '/admin/timing-logs',
+  processImageValidateController.getTimingLogs
+);
+
+/**
+* ✅ 추가: GET /api/admin/timing-statistics
+*
+* 설명: 메모리 버퍼의 타이밍 통계 조회 (관리자용)
+* 
+* @returns {200} 타이밍 통계
+* {
+*   success: true,
+*   data: {
+*     total_requests: 156,
+*     total_time: {
+*       min: 950,
+*       max: 5200,
+*       avg: 2340,
+*       total: 156
+*     },
+*     openai_response_time: {
+*       min: 650,
+*       max: 4100,
+*       avg: 1780,
+*       total: 156
+*     },
+*     server_processing_time: {
+*       min: 150,
+*       max: 1200,
+*       avg: 560,
+*       total: 156
+*     },
+*     avg_openai_ratio: "76.07%"
+*   },
+*   message: "타이밍 통계 조회 성공",
+*   timestamp: "2025-12-18T09:26:00.000Z"
+* }
+*
+* @example
+* GET /api/admin/timing-statistics
+*
+* @note
+* - 현재 메모리에 있는 모든 로그 기반 통계
+* - 최소값(min), 최대값(max), 평균(avg) 제공
+* - OpenAI 응답 시간의 전체 응답 시간 대비 비율(avg_openai_ratio) 제공
+*/
+
+router.get(
+  '/admin/timing-statistics',
+  processImageValidateController.getTimingStatistics
+);
 
 module.exports = router;
