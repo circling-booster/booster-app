@@ -31,26 +31,57 @@ app.use(helmet({
 }));
 
 // CORS 설정: 로컬 개발 환경과 Azure 배포 환경 모두 지원
-app.use(cors({
-    origin: [
-        'http://localhost:3000',      // 백엔드 로컬
-        'http://localhost:5500',      // Live Server
-        'http://localhost:8000',      // Python HTTP Server
-        'https://booster-app.azurewebsites.net', // Azure App Service
-        process.env.CORS_ORIGIN       // .env에서 추가 설정 가능
-    ].filter(Boolean),                // undefined 제거
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
-//API 용 모든 origin COrs
-app.use('/api/validate-key', cors({
-    origin: '*',  // ✅ 이 경로에서만 모든 Origin 허용
-    methods: ['POST'],
-    allowedHeaders: ['Content-Type']
-}));
+// ✅ 화이트리스트 설정 (process.env.CORS_ORIGIN 포함)
+const allowedOrigins = [
+    'http://localhost:3000',      // 백엔드 로컬
+    'http://localhost:5500',      // Live Server
+    'http://localhost:8000',      // Python HTTP Server
+    'https://booster-app.azurewebsites.net',  // Azure App Service
+    process.env.CORS_ORIGIN       // .env에서 추가 설정
+].filter(Boolean);  // undefined 제거
 
+console.log('✅ CORS 허용 Origin:', allowedOrigins);
+
+// ✅ 단 하나의 CORS 미들웨어 (모든 경로에 적용)
+app.use(cors((req, callback) => {
+    console.log('[CORS_CHECK]', {
+        method: req.method,
+        path: req.path,
+        origin: req.headers.origin
+    });
+
+    // ============================================================================
+    // 케이스 1: /api/validate-key는 모든 origin 허용 (공개 API)
+    // ============================================================================
+    if (req.path === '/api/validate-key') {
+        return callback(null, {
+            origin: true,  // ✅ 모든 origin 허용
+            methods: ['GET', 'POST', 'OPTIONS'],
+            allowedHeaders: ['Content-Type'],
+            credentials: false,  // 공개 API이므로 credentials 불필요
+            optionsSuccessStatus: 200
+        });
+    }
+
+    // ============================================================================
+    // 케이스 2: 다른 모든 경로는 화이트리스트만 허용 (보호된 API)
+    // ============================================================================
+    const origin = req.headers.origin;
+    
+    if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, {
+            origin: true,
+            credentials: true,  // 보호된 API이므로 credentials 필요
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization'],
+            optionsSuccessStatus: 200
+        });
+    } else {
+        console.log('[CORS_REJECTED]', { origin });
+        callback(new Error('Not allowed by CORS'));
+    }
+}));
 
 app.use(morgan('combined')); // 로그 기록
 app.use(ipLimiter); // IP 기반 Rate Limiting
