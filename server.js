@@ -18,6 +18,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
 const validateApiKeyRoutes = require('./routes/validateApiKeyRoutes');
+const processImageValidateRoutes = require('./routes/processImageValidateRoutes');
 
 
 const app = express();
@@ -54,7 +55,7 @@ app.use(cors((req, callback) => {
     // ============================================================================
     // 케이스 1: /api/validate-key는 모든 origin 허용 (공개 API)
     // ============================================================================
-    if (req.path === '/api/validate-key') {
+    if (req.path === '/api/validate-key' || req.path === '/api/process-image-validate' ) {
         return callback(null, {
             origin: true,  // ✅ 모든 origin 허용
             methods: ['GET', 'POST', 'OPTIONS'],
@@ -108,6 +109,7 @@ app.use('/api', apiKeyRoutes);       // /api/api-keys/...
 app.use('/api', adminRoutes);        // /api/admin/...
 app.use('/api', dashboardRoutes);    // /api/dashboard/...
 app.use('/api', webhookRoutes);      // /api/webhooks/...
+app.use('/api', processImageValidateRoutes);
 
 app.use('/api', validateApiKeyRoutes);
 // --- 4. 프론트엔드 정적 파일 서빙 (중요) ---
