@@ -53,19 +53,19 @@ app.use(cors((req, callback) => {
     });
 
     // ============================================================================
-    // 케이스 1: /api/validate-key는 모든 origin 허용 (공개 API)
+    // 케이스 1: /api/ 등은 모든 origin 허용 (공개 API)
     // ============================================================================
     if (
         req.path === '/api/validate-key' ||
         req.path === '/api/process-image-validate' ||
         req.path === '/api/auth/login' ||
-        req.path === '/api/auth/signin' //||
-        //  req.path === '/api/process-image-validate' ||
+        req.path === '/api/auth/signup' ||
+        req.path === '/api/api-keys' //||
 
     ) {
         return callback(null, {
             origin: true,  // ✅ 모든 origin 허용
-            methods: ['GET', 'POST', 'OPTIONS'],
+            methods: ['GET', 'DELETE', 'POST', 'OPTIONS'],
             allowedHeaders: ['Content-Type'],
             credentials: false,  // 공개 API이므로 credentials 불필요
             optionsSuccessStatus: 200
