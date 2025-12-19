@@ -55,7 +55,14 @@ app.use(cors((req, callback) => {
     // ============================================================================
     // 케이스 1: /api/validate-key는 모든 origin 허용 (공개 API)
     // ============================================================================
-    if (req.path === '/api/validate-key' || req.path === '/api/process-image-validate' ) {
+    if (
+        req.path === '/api/validate-key' ||
+        req.path === '/api/process-image-validate' ||
+        req.path === '/api/auth/login' ||
+        req.path === '/api/auth/signin' //||
+        //  req.path === '/api/process-image-validate' ||
+
+    ) {
         return callback(null, {
             origin: true,  // ✅ 모든 origin 허용
             methods: ['GET', 'POST', 'OPTIONS'],
@@ -69,7 +76,7 @@ app.use(cors((req, callback) => {
     // 케이스 2: 다른 모든 경로는 화이트리스트만 허용 (보호된 API)
     // ============================================================================
     const origin = req.headers.origin;
-    
+
     if (!origin || allowedOrigins.includes(origin)) {
         callback(null, {
             origin: true,
