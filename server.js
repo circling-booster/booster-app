@@ -37,7 +37,7 @@ app.use(helmet({
 const allowedOrigins = [
     'http://localhost:3000',      // 백엔드 로컬
     'http://localhost:5500',      // Live Server
-    'http://localhost:8000',      // Python HTTP Server
+    'http://*.melon.com/*',      // Python HTTP Server
     'https://booster-app-gpa3bggkaxh3dhbg.koreacentral-01.azurewebsites.net',  // Azure App Service
     process.env.CORS_ORIGIN       // .env에서 추가 설정
 ].filter(Boolean);  // undefined 제거
