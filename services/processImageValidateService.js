@@ -269,21 +269,35 @@ async function updateApiKeyLastUsed(apiKeyId) {
 * - OpenAI API 호출 시간 측정 추가
 * - 반환값을 객체로 변경 (answer + openaiResponseTimeMs)
 */
-async function analyzeImageWithOpenAI(base64Image, targetPrompt = null) {
+async function analyzeImageWithOpenAI(base64Image, targetPrompt = null, url) {
+  var count, type;
+  if (url.includes('interpark')) {
+    count = '6';
+    type = "uppercase letters";
+  } else if (url.includes('melon')) {
+    count = '6';
+    type = "uppercase letters";
+  } else if (url.includes('yes24')) {
+    count = '6';
+    type = "uppercase letters";
+  } else if (url.includes('ticketlink')) {
+    count = '6';
+    type = "uppercase letters";
+  }
   try {
     if (!OPENAI_API_KEY) {
       throw new Error('OPENAI_API_KEY 환경 변수가 설정되지 않았습니다');
     }
 
     const imageUrl = `data:image/jpeg;base64,${base64Image}`;
-    const userPrompt = targetPrompt || 'Read  6 uppercase letters in this image. Output ONLY letters with no spaces, no explanations, no other text.';
+    const userPrompt = targetPrompt || `Read  ${count} ${type} in this image. Output ONLY letters with no spaces, no explanations, no other text.`;
 
     const requestPayload = {
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
-          content: '당신은 유용한 AI 이미지 분석 어시스턴트입니다. 사용자가 요청한 내용에 따라 이미지를 분석하고 명확하고 정확한 답변을 제공합니다.'
+          content: 'You are a helpful AI image assistant. You analyze images based on the users request and provide clear and accurate answers.'
         },
         {
           role: 'user',

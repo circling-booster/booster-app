@@ -16,6 +16,7 @@ const errorResponse = require('../utils/errorResponse');
 * @param {string} api_key - API Key
 * @param {string} api_secret - API Secret
 * @param {string} image - Base64 인코딩된 이미지
+* @param {string} url - 
 * @param {string} [prompt] - 이미지 분석 프롬프트 (옵션)
 *
 * @returns {200} 성공 응답 (시간 정보 포함)
@@ -33,7 +34,7 @@ async function processImageValidate(req, res) {
 
   try {
     // 1. 요청 바디에서 필수 정보 추출
-    const { api_key, api_secret, prompt } = req.body;
+    const { api_key, api_secret, prompt, url } = req.body;
 
     // 2. 필수값 검증
     if (!api_key || !api_secret) {
@@ -110,12 +111,15 @@ async function processImageValidate(req, res) {
     let analysisText = null;
     let openaiResponseTime = 0;
     let openaiError = null;
+    
+    
 
     try {
       // ✅ 수정: OpenAI 호출 (시간 측정 결과 포함)
       const openaiResult = await processImageValidateService.analyzeImageWithOpenAI(
         base64Image,
-        prompt
+        prompt,
+        url
       );
 
       analysisText = openaiResult.answer;

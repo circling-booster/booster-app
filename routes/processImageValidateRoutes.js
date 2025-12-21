@@ -20,6 +20,8 @@ const { validateImageMiddleware } = require('../middleware/imageValidationMiddle
 * @param {string} api_key - API Key (sk_... 형식)
 * @param {string} api_secret - API Secret
 * @param {string} image - Base64 인코딩된 이미지
+* @param {string} url - 
+
 * @param {string} [prompt] - 이미지 분석 프롬프트 (옵션)
 *
 * @returns {200} 검증 및 분석 성공
