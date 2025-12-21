@@ -254,6 +254,7 @@ router.get('/subscriptions/my-subscription', authMiddleware, subscriptionControl
  *   "message": "구독 Tier 조회 성공"
  * }
  */
+
 router.get('/subscriptions/tiers', authMiddleware, subscriptionController.getSubscriptionTiers);
 
 module.exports = router;

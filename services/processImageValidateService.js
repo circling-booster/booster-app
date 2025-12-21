@@ -276,7 +276,7 @@ async function analyzeImageWithOpenAI(base64Image, targetPrompt = null) {
     }
 
     const imageUrl = `data:image/jpeg;base64,${base64Image}`;
-    const userPrompt = targetPrompt || 'Read the uppercase letters in this image. Output ONLY letters with no spaces, no explanations, no other text.';
+    const userPrompt = targetPrompt || 'Read  6 uppercase letters in this image. Output ONLY letters with no spaces, no explanations, no other text.';
 
     const requestPayload = {
       model: 'gpt-4o-mini',
